@@ -27,7 +27,7 @@
         "openai": [
           {
             "type": "bearer",
-            "apiKey": "<OpenAI API的ApiKey，sk- 开头>"
+            "apiKey": "OpenAI API的ApiKey，sk- 开头"
           }
         ],
         "deepseek": [

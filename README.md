@@ -27,19 +27,19 @@ For details, see: `/bin/model_mapping.json`
         "openai": [
           {
             "type": "bearer",
-            "apiKey": "<OpenAI API Key, starting with sk->"
+            "apiKey": "OpenAI API Key, starting with sk-"
           }
         ],
         "deepseek": [
           {
             "type": "bearer",
-            "apiKey": "DeepSeek API Key, starting with sk->"
+            "apiKey": "DeepSeek API Key, starting with sk-"
           }
         ],
         "qwen": [
           {
             "type": "bearer",
-            "apiKey": "Qwen API Key, starting with sk->"
+            "apiKey": "Qwen API Key, starting with sk-"
           }
         ]
       }
