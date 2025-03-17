@@ -1,7 +1,12 @@
 {
   "models": [
     {
-      "names": ["gpt-4", "gpt-3.5", "gpt-4o", "gpt-4o-mini"],
+      "names": [
+        "gpt-4", "gpt-3.5", "gpt-4o", "gpt-4o-mini",
+        "tts-1", "tts-1-hd",
+        "whisper-1",
+        "text-embeddings-3-small", "text-embeddings-3-large", "text-embeddings-ada-002"
+      ],
       "adapter": "openai",
       "baseUrl": "https://api.openai.com"
     },

@@ -10,7 +10,7 @@ class OpenAIAdapter extends LLMAdapter{
   ResponseHandler get responseHandler => OpenAIResponseHandler();
 
   @override
-  void init(Meta meta) {}@override
+  void init(Meta meta) {}
 
   @override
   String getRequestMethod(Request request, Meta meta) {
