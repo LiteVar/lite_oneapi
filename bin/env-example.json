@@ -1,0 +1,25 @@
+{
+  "apiKeys": [
+    "sk-xxx"
+  ],
+  "adapterKeys": {
+    "openai": [
+      {
+        "type": "bearer",
+        "apiKey": "sk-aaa"
+      }
+    ],
+    "deepseek": [
+      {
+        "type": "bearer",
+        "apiKey": "sk-bbb"
+      }
+    ],
+    "qwen": [
+      {
+        "type": "bearer",
+        "apiKey": "sk-ccc"
+      }
+    ]
+  }
+}

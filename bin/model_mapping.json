@@ -1,0 +1,19 @@
+{
+  "models": [
+    {
+      "names": ["gpt-4", "gpt-3.5", "gpt-4o", "gpt-4o-mini"],
+      "adapter": "openai",
+      "baseUrl": "https://api.openai.com"
+    },
+    {
+      "names": ["deepseek-chat", "deepseek-reason"],
+      "adapter": "deepseek",
+      "baseUrl": "https://api.deepseek.com"
+    },
+    {
+      "names": ["qwq-32b"],
+      "adapter": "qwen",
+      "baseUrl": "https://dashscope.aliyuncs.com"
+    }
+  ]
+}
