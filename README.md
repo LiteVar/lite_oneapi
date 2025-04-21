@@ -1,5 +1,7 @@
 # Lite OneAPI
 
+English · [中文](README-zh_CN.md)
+
 A lite OpenAI HTTP API-compatible transformation tool that allows custom conversion rules for LLM APIs.
 
 ## Usage

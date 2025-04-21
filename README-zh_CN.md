@@ -1,5 +1,7 @@
 # Lite OneAPI
 
+[English](README.md) · 中文
+
 一个轻量级的OpenAI HTTP API兼容转换工具，可以自定义大模型API的转换规则
 
 ## 使用
