@@ -1,10 +1,10 @@
 name: lite_oneapi
-description: A server app using the shelf package and Docker.
-version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+description: An API convertor from OpenAI Schema to Other APIs.
+version: 0.1.0
+repository: https://github.com/LiteVar/lite_oneapi
 
 environment:
-  sdk: ^3.7.0
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   shelf: ^1.4.0

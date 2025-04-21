@@ -28,14 +28,14 @@ ChatCompletionsChunk _$ChatCompletionsChunkFromJson(
 Map<String, dynamic> _$ChatCompletionsChunkToJson(
   ChatCompletionsChunk instance,
 ) => <String, dynamic>{
-  'choices': instance.choices,
+  'choices': instance.choices.map((e) => e.toJson()).toList(),
   'created': instance.created,
   'id': instance.id,
   'model': instance.model,
   'object': instance.object,
   if (instance.service_tier case final value?) 'service_tier': value,
   'system_fingerprint': instance.system_fingerprint,
-  if (instance.usage case final value?) 'usage': value,
+  if (instance.usage?.toJson() case final value?) 'usage': value,
 };
 
 Choice _$ChoiceFromJson(Map<String, dynamic> json) => Choice(
@@ -50,9 +50,9 @@ Choice _$ChoiceFromJson(Map<String, dynamic> json) => Choice(
 
 Map<String, dynamic> _$ChoiceToJson(Choice instance) => <String, dynamic>{
   'delta': instance.delta,
-  if (instance.finish_reason case final value?) 'finish_reason': value,
+  'finish_reason': instance.finish_reason,
   'index': instance.index,
-  if (instance.logprobs case final value?) 'logprobs': value,
+  'logprobs': instance.logprobs,
 };
 
 Delta _$DeltaFromJson(Map<String, dynamic> json) => Delta(
@@ -79,8 +79,8 @@ Logprobs _$LogprobsFromJson(Map<String, dynamic> json) => Logprobs(
 );
 
 Map<String, dynamic> _$LogprobsToJson(Logprobs instance) => <String, dynamic>{
-  if (instance.content case final value?) 'content': value,
-  if (instance.refusal case final value?) 'refusal': value,
+  'content': instance.content,
+  'refusal': instance.refusal,
 };
 
 Logprob _$LogprobFromJson(Map<String, dynamic> json) => Logprob(
@@ -97,7 +97,7 @@ Logprob _$LogprobFromJson(Map<String, dynamic> json) => Logprob(
 );
 
 Map<String, dynamic> _$LogprobToJson(Logprob instance) => <String, dynamic>{
-  if (instance.bytes case final value?) 'bytes': value,
+  'bytes': instance.bytes,
   'logprob': instance.logprob,
   'token': instance.token,
   'top_logprobs': instance.top_logprobs,
@@ -117,7 +117,7 @@ TopLogrob _$TopLogrobFromJson(Map<String, dynamic> json) => TopLogrob(
 );
 
 Map<String, dynamic> _$TopLogrobToJson(TopLogrob instance) => <String, dynamic>{
-  if (instance.bytes case final value?) 'bytes': value,
+  'bytes': instance.bytes,
   'logprob': instance.logprob,
   'token': instance.token,
   'top_logprobs': instance.top_logprobs,

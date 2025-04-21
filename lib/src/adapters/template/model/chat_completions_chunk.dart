@@ -4,16 +4,16 @@ part 'chat_completions_chunk.g.dart';
 
 /// https://docs.newllm.com/docs/api-reference/chat-streaming/streaming
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ChatCompletionsChunk {
   List<Choice> choices;
   int created;
   String id;
   String model;
   String object;  /// `chat.completion.chunk`
-  @JsonKey(includeIfNull: false) String? service_tier;
+  String? service_tier;
   String system_fingerprint;
-  @JsonKey(includeIfNull: false) Usage? usage;
+  Usage? usage;
 
   ChatCompletionsChunk({
     required this.id,
@@ -34,9 +34,9 @@ class ChatCompletionsChunk {
 @JsonSerializable()
 class Choice {
   Delta delta;
-  @JsonKey(includeIfNull: false) String? finish_reason; /// `stop`, `length`, `content_filter`, `tool_calls`
+  String? finish_reason; /// `stop`, `length`, `content_filter`, `tool_calls`
   String index;
-  @JsonKey(includeIfNull: false) Logprobs? logprobs;
+  Logprobs? logprobs;
 
   Choice({required this.delta, required this.finish_reason, required this.index, this.logprobs});
 
@@ -60,8 +60,8 @@ class Delta {
 
 @JsonSerializable()
 class Logprobs {
-  @JsonKey(includeIfNull: false) List<Logprob>? content;
-  @JsonKey(includeIfNull: false) List<Logprob>? refusal;
+  List<Logprob>? content;
+  List<Logprob>? refusal;
 
   Logprobs({this.content, this.refusal});
 
@@ -72,7 +72,7 @@ class Logprobs {
 
 @JsonSerializable()
 class Logprob {
-  @JsonKey(includeIfNull: false) List<int>? bytes;
+  List<int>? bytes;
   int logprob;
   String token;
   List<TopLogrob> top_logprobs;
@@ -86,7 +86,7 @@ class Logprob {
 
 @JsonSerializable()
 class TopLogrob {
-  @JsonKey(includeIfNull: false) List<int>? bytes;
+  List<int>? bytes;
   int logprob;
   String token;
   List<TopLogrob> top_logprobs;

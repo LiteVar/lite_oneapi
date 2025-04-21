@@ -25,14 +25,14 @@ ChatCompletionsResponse _$ChatCompletionsResponseFromJson(
 Map<String, dynamic> _$ChatCompletionsResponseToJson(
   ChatCompletionsResponse instance,
 ) => <String, dynamic>{
-  'choices': instance.choices,
+  'choices': instance.choices.map((e) => e.toJson()).toList(),
   'created': instance.created,
   'id': instance.id,
   'model': instance.model,
   'object': instance.object,
   if (instance.service_tier case final value?) 'service_tier': value,
   'system_fingerprint': instance.system_fingerprint,
-  'usage': instance.usage,
+  'usage': instance.usage.toJson(),
 };
 
 Choice _$ChoiceFromJson(Map<String, dynamic> json) => Choice(
@@ -48,8 +48,8 @@ Choice _$ChoiceFromJson(Map<String, dynamic> json) => Choice(
 Map<String, dynamic> _$ChoiceToJson(Choice instance) => <String, dynamic>{
   'finish_reason': instance.finish_reason,
   'index': instance.index,
-  if (instance.logprobs case final value?) 'logprobs': value,
-  'message': instance.message,
+  if (instance.logprobs?.toJson() case final value?) 'logprobs': value,
+  'message': instance.message.toJson(),
 };
 
 Logprobs _$LogprobsFromJson(Map<String, dynamic> json) => Logprobs(
@@ -64,8 +64,10 @@ Logprobs _$LogprobsFromJson(Map<String, dynamic> json) => Logprobs(
 );
 
 Map<String, dynamic> _$LogprobsToJson(Logprobs instance) => <String, dynamic>{
-  if (instance.content case final value?) 'content': value,
-  if (instance.refusal case final value?) 'refusal': value,
+  if (instance.content?.map((e) => e.toJson()).toList() case final value?)
+    'content': value,
+  if (instance.refusal?.map((e) => e.toJson()).toList() case final value?)
+    'refusal': value,
 };
 
 Logprob _$LogprobFromJson(Map<String, dynamic> json) => Logprob(
@@ -85,7 +87,7 @@ Map<String, dynamic> _$LogprobToJson(Logprob instance) => <String, dynamic>{
   if (instance.bytes case final value?) 'bytes': value,
   'logprob': instance.logprob,
   'token': instance.token,
-  'top_logprobs': instance.top_logprobs,
+  'top_logprobs': instance.top_logprobs.map((e) => e.toJson()).toList(),
 };
 
 TopLogrob _$TopLogrobFromJson(Map<String, dynamic> json) => TopLogrob(
@@ -105,7 +107,7 @@ Map<String, dynamic> _$TopLogrobToJson(TopLogrob instance) => <String, dynamic>{
   if (instance.bytes case final value?) 'bytes': value,
   'logprob': instance.logprob,
   'token': instance.token,
-  'top_logprobs': instance.top_logprobs,
+  'top_logprobs': instance.top_logprobs.map((e) => e.toJson()).toList(),
 };
 
 Message _$MessageFromJson(Map<String, dynamic> json) => Message(
@@ -137,11 +139,13 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   if (instance.content case final value?) 'content': value,
   if (instance.refusal case final value?) 'refusal': value,
   'role': instance.role,
-  'annotations': instance.annotations,
-  if (instance.audio case final value?) 'audio': value,
-  if (instance.function_call case final value?) 'function_call': value,
+  'annotations': instance.annotations.map((e) => e.toJson()).toList(),
+  if (instance.audio?.toJson() case final value?) 'audio': value,
+  if (instance.function_call?.toJson() case final value?)
+    'function_call': value,
   if (instance.name case final value?) 'name': value,
-  if (instance.tool_calls case final value?) 'tool_calls': value,
+  if (instance.tool_calls?.map((e) => e.toJson()).toList() case final value?)
+    'tool_calls': value,
 };
 
 Annotation _$AnnotationFromJson(Map<String, dynamic> json) => Annotation(
@@ -154,7 +158,7 @@ Annotation _$AnnotationFromJson(Map<String, dynamic> json) => Annotation(
 Map<String, dynamic> _$AnnotationToJson(Annotation instance) =>
     <String, dynamic>{
       'type': instance.type,
-      'url_citation': instance.url_citation,
+      'url_citation': instance.url_citation.toJson(),
     };
 
 Audio _$AudioFromJson(Map<String, dynamic> json) => Audio(
@@ -220,8 +224,8 @@ Map<String, dynamic> _$UsageToJson(Usage instance) => <String, dynamic>{
   'completion_tokens': instance.completion_tokens,
   'prompt_tokens': instance.prompt_tokens,
   'total_tokens': instance.total_tokens,
-  'completion_tokens_details': instance.completion_tokens_details,
-  'prompt_tokens_details': instance.prompt_tokens_details,
+  'completion_tokens_details': instance.completion_tokens_details.toJson(),
+  'prompt_tokens_details': instance.prompt_tokens_details.toJson(),
 };
 
 CompletionTokensDetails _$CompletionTokensDetailsFromJson(
