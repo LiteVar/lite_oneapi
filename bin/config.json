@@ -5,6 +5,6 @@
     "port": 9517
   },
   "log": {
-    "level": "FINEST"
+    "level": "INFO"
   }
 }
