@@ -78,12 +78,13 @@ ChatCompletionRequest _$ChatCompletionRequestFromJson(
 Map<String, dynamic> _$ChatCompletionRequestToJson(
   ChatCompletionRequest instance,
 ) => <String, dynamic>{
-  'messages': instance.messages,
+  'messages': instance.messages.map((e) => e.toJson()).toList(),
   'model': instance.model,
-  if (instance.audio case final value?) 'audio': value,
+  if (instance.audio?.toJson() case final value?) 'audio': value,
   if (instance.frequency_penalty case final value?) 'frequency_penalty': value,
   if (instance.function_call case final value?) 'function_call': value,
-  if (instance.functions case final value?) 'functions': value,
+  if (instance.functions?.map((e) => e.toJson()).toList() case final value?)
+    'functions': value,
   if (instance.logit_bias case final value?) 'logit_bias': value,
   if (instance.logprobs case final value?) 'logprobs': value,
   if (instance.max_completion_tokens case final value?)
@@ -94,23 +95,26 @@ Map<String, dynamic> _$ChatCompletionRequestToJson(
   if (instance.n case final value?) 'n': value,
   if (instance.parallel_tool_calls case final value?)
     'parallel_tool_calls': value,
-  if (instance.prediction case final value?) 'prediction': value,
+  if (instance.prediction?.toJson() case final value?) 'prediction': value,
   if (instance.presence_penalty case final value?) 'presence_penalty': value,
   if (instance.reasoning_effort case final value?) 'reasoning_effort': value,
-  if (instance.response_format case final value?) 'response_format': value,
+  if (instance.response_format?.toJson() case final value?)
+    'response_format': value,
   if (instance.seed case final value?) 'seed': value,
   if (instance.service_tier case final value?) 'service_tier': value,
   if (instance.stop case final value?) 'stop': value,
   if (instance.store case final value?) 'store': value,
   if (instance.stream case final value?) 'stream': value,
-  if (instance.stream_options case final value?) 'stream_options': value,
+  if (instance.stream_options?.toJson() case final value?)
+    'stream_options': value,
   if (instance.temperature case final value?) 'temperature': value,
   if (instance.tool_choice case final value?) 'tool_choice': value,
-  if (instance.tools case final value?) 'tools': value,
+  if (instance.tools?.map((e) => e.toJson()).toList() case final value?)
+    'tools': value,
   if (instance.top_logprobs case final value?) 'top_logprobs': value,
   if (instance.top_p case final value?) 'top_p': value,
   if (instance.user case final value?) 'user': value,
-  if (instance.web_search_options case final value?)
+  if (instance.web_search_options?.toJson() case final value?)
     'web_search_options': value,
 };
 
@@ -134,11 +138,13 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   'role': instance.role,
-  'content': instance.content,
+  if (instance.content case final value?) 'content': value,
   if (instance.name case final value?) 'name': value,
-  if (instance.function_call case final value?) 'function_call': value,
+  if (instance.function_call?.toJson() case final value?)
+    'function_call': value,
   if (instance.refusal case final value?) 'refusal': value,
-  if (instance.tool_calls case final value?) 'tool_calls': value,
+  if (instance.tool_calls?.map((e) => e.toJson()).toList() case final value?)
+    'tool_calls': value,
   if (instance.tool_call_id case final value?) 'tool_call_id': value,
 };
 
@@ -183,7 +189,7 @@ ToolCall _$ToolCallFromJson(Map<String, dynamic> json) => ToolCall(
 );
 
 Map<String, dynamic> _$ToolCallToJson(ToolCall instance) => <String, dynamic>{
-  'function': instance.function,
+  'function': instance.function.toJson(),
   'id': instance.id,
   'type': instance.type,
 };
@@ -214,7 +220,10 @@ Prediction _$PredictionFromJson(Map<String, dynamic> json) =>
     Prediction(type: json['type'] as String, content: json['content']);
 
 Map<String, dynamic> _$PredictionToJson(Prediction instance) =>
-    <String, dynamic>{'type': instance.type, 'content': instance.content};
+    <String, dynamic>{
+      'type': instance.type,
+      if (instance.content case final value?) 'content': value,
+    };
 
 ResponseFormat _$ResponseFormatFromJson(Map<String, dynamic> json) =>
     ResponseFormat(
@@ -227,11 +236,12 @@ ResponseFormat _$ResponseFormatFromJson(Map<String, dynamic> json) =>
               ),
     );
 
-Map<String, dynamic> _$ResponseFormatToJson(ResponseFormat instance) =>
-    <String, dynamic>{
-      'type': instance.type,
-      if (instance.json_schema case final value?) 'json_schema': value,
-    };
+Map<String, dynamic> _$ResponseFormatToJson(
+  ResponseFormat instance,
+) => <String, dynamic>{
+  'type': instance.type,
+  if (instance.json_schema?.toJson() case final value?) 'json_schema': value,
+};
 
 JsonSchema _$JsonSchemaFromJson(Map<String, dynamic> json) => JsonSchema(
   name: json['name'] as String,
@@ -244,7 +254,7 @@ Map<String, dynamic> _$JsonSchemaToJson(JsonSchema instance) =>
     <String, dynamic>{
       'name': instance.name,
       if (instance.description case final value?) 'description': value,
-      'schema': instance.schema,
+      if (instance.schema case final value?) 'schema': value,
       if (instance.strict case final value?) 'strict': value,
     };
 
@@ -263,7 +273,7 @@ Tool _$ToolFromJson(Map<String, dynamic> json) => Tool(
 
 Map<String, dynamic> _$ToolToJson(Tool instance) => <String, dynamic>{
   'type': instance.type,
-  'function': instance.function,
+  'function': instance.function.toJson(),
 };
 
 WebSearchOptions _$WebSearchOptionsFromJson(Map<String, dynamic> json) =>
@@ -281,7 +291,8 @@ Map<String, dynamic> _$WebSearchOptionsToJson(WebSearchOptions instance) =>
     <String, dynamic>{
       if (instance.search_context_size case final value?)
         'search_context_size': value,
-      if (instance.user_location case final value?) 'user_location': value,
+      if (instance.user_location?.toJson() case final value?)
+        'user_location': value,
     };
 
 UserLocation _$UserLocationFromJson(Map<String, dynamic> json) => UserLocation(
@@ -294,7 +305,7 @@ UserLocation _$UserLocationFromJson(Map<String, dynamic> json) => UserLocation(
 Map<String, dynamic> _$UserLocationToJson(UserLocation instance) =>
     <String, dynamic>{
       'type': instance.type,
-      'approximate': instance.approximate,
+      'approximate': instance.approximate.toJson(),
     };
 
 Approximate _$ApproximateFromJson(Map<String, dynamic> json) => Approximate(

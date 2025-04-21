@@ -29,14 +29,14 @@ Map<String, dynamic> _$ChatCompletionsChunkToJson(
   ChatCompletionsChunk instance,
 ) => <String, dynamic>{
   'id': instance.id,
-  'choices': instance.choices,
+  'choices': instance.choices.map((e) => e.toJson()).toList(),
   'created': instance.created,
   'model': instance.model,
   'object': instance.object,
   if (instance.service_tier case final value?) 'service_tier': value,
   if (instance.system_fingerprint case final value?)
     'system_fingerprint': value,
-  if (instance.usage case final value?) 'usage': value,
+  if (instance.usage?.toJson() case final value?) 'usage': value,
 };
 
 Choice _$ChoiceFromJson(Map<String, dynamic> json) => Choice(
@@ -46,7 +46,7 @@ Choice _$ChoiceFromJson(Map<String, dynamic> json) => Choice(
 );
 
 Map<String, dynamic> _$ChoiceToJson(Choice instance) => <String, dynamic>{
-  'delta': instance.delta,
+  'delta': instance.delta.toJson(),
   if (instance.finish_reason case final value?) 'finish_reason': value,
   'index': instance.index,
 };
@@ -72,10 +72,12 @@ Delta _$DeltaFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$DeltaToJson(Delta instance) => <String, dynamic>{
   'content': instance.content,
   'reasoning_content': instance.reasoning_content,
-  if (instance.function_call case final value?) 'function_call': value,
+  if (instance.function_call?.toJson() case final value?)
+    'function_call': value,
   if (instance.refusal case final value?) 'refusal': value,
   'role': instance.role,
-  if (instance.tools_calls case final value?) 'tools_calls': value,
+  if (instance.tools_calls?.map((e) => e.toJson()).toList() case final value?)
+    'tools_calls': value,
 };
 
 FunctionCalledModel _$FunctionCalledModelFromJson(Map<String, dynamic> json) =>
@@ -99,7 +101,7 @@ ToolCall _$ToolCallFromJson(Map<String, dynamic> json) => ToolCall(
 Map<String, dynamic> _$ToolCallToJson(ToolCall instance) => <String, dynamic>{
   'id': instance.id,
   'type': instance.type,
-  'function': instance.function,
+  'function': instance.function.toJson(),
 };
 
 Usage _$UsageFromJson(Map<String, dynamic> json) => Usage(
@@ -121,9 +123,9 @@ Map<String, dynamic> _$UsageToJson(Usage instance) => <String, dynamic>{
   'completion_tokens': instance.completion_tokens,
   'prompt_tokens': instance.prompt_tokens,
   'total_tokens': instance.total_tokens,
-  if (instance.completion_tokens_details case final value?)
+  if (instance.completion_tokens_details?.toJson() case final value?)
     'completion_tokens_details': value,
-  'prompt_tokens_details': instance.prompt_tokens_details,
+  'prompt_tokens_details': instance.prompt_tokens_details.toJson(),
 };
 
 CompletionTokensDetails _$CompletionTokensDetailsFromJson(

@@ -56,23 +56,26 @@ Map<String, dynamic> _$ChatCompletionRequestToJson(
   ChatCompletionRequest instance,
 ) => <String, dynamic>{
   'model': instance.model,
-  'messages': instance.messages,
+  'messages': instance.messages.map((e) => e.toJson()).toList(),
   if (instance.stream case final value?) 'stream': value,
-  if (instance.stream_options case final value?) 'stream_options': value,
+  if (instance.stream_options?.toJson() case final value?)
+    'stream_options': value,
   if (instance.modalities case final value?) 'modalities': value,
   if (instance.temperature case final value?) 'temperature': value,
   if (instance.top_p case final value?) 'top_p': value,
   if (instance.presence_penalty case final value?) 'presence_penalty': value,
-  if (instance.response_format case final value?) 'response_format': value,
+  if (instance.response_format?.toJson() case final value?)
+    'response_format': value,
   if (instance.max_tokens case final value?) 'max_tokens': value,
   if (instance.n case final value?) 'n': value,
   if (instance.seed case final value?) 'seed': value,
   if (instance.stop case final value?) 'stop': value,
-  if (instance.tools case final value?) 'tools': value,
+  if (instance.tools?.map((e) => e.toJson()).toList() case final value?)
+    'tools': value,
   if (instance.tool_choice case final value?) 'tool_choice': value,
   if (instance.parallel_tool_calls case final value?)
     'parallel_tool_calls': value,
-  if (instance.translation_options case final value?)
+  if (instance.translation_options?.toJson() case final value?)
     'translation_options': value,
   if (instance.enable_search case final value?) 'enable_search': value,
   if (instance.x_dashScope_dataInspection case final value?)
@@ -92,9 +95,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   'role': instance.role,
-  'content': instance.content,
+  if (instance.content case final value?) 'content': value,
   if (instance.partial case final value?) 'partial': value,
-  if (instance.tool_calls case final value?) 'tool_calls': value,
+  if (instance.tool_calls?.map((e) => e.toJson()).toList() case final value?)
+    'tool_calls': value,
   if (instance.tool_call_id case final value?) 'tool_call_id': value,
 };
 
@@ -133,7 +137,7 @@ ToolCall _$ToolCallFromJson(Map<String, dynamic> json) => ToolCall(
 Map<String, dynamic> _$ToolCallToJson(ToolCall instance) => <String, dynamic>{
   'id': instance.id,
   'type': instance.type,
-  'function': instance.function,
+  'function': instance.function.toJson(),
 };
 
 FunctionModel _$FunctionModelFromJson(Map<String, dynamic> json) =>
@@ -171,7 +175,7 @@ Tool _$ToolFromJson(Map<String, dynamic> json) => Tool(
 
 Map<String, dynamic> _$ToolToJson(Tool instance) => <String, dynamic>{
   'type': instance.type,
-  'function': instance.function,
+  'function': instance.function.toJson(),
 };
 
 TranslationOptions _$TranslationOptionsFromJson(Map<String, dynamic> json) =>
@@ -193,8 +197,10 @@ Map<String, dynamic> _$TranslationOptionsToJson(TranslationOptions instance) =>
     <String, dynamic>{
       'source_lang': instance.source_lang,
       'target_lang': instance.target_lang,
-      if (instance.terms case final value?) 'terms': value,
-      if (instance.tm_list case final value?) 'tm_list': value,
+      if (instance.terms?.map((e) => e.toJson()).toList() case final value?)
+        'terms': value,
+      if (instance.tm_list?.map((e) => e.toJson()).toList() case final value?)
+        'tm_list': value,
       if (instance.domains case final value?) 'domains': value,
     };
 

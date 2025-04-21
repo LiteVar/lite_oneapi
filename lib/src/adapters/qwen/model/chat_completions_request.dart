@@ -4,27 +4,27 @@ part 'chat_completions_request.g.dart';
 
 /// https://help.aliyun.com/zh/model-studio/developer-reference/use-qwen-by-calling-api#f4514ce9072sb
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ChatCompletionRequest {
   String model;
   List<Message> messages;
-  @JsonKey(includeIfNull: false) bool? stream;
-  @JsonKey(includeIfNull: false) StreamOptions? stream_options;
-  @JsonKey(includeIfNull: false) List<String>? modalities;
-  @JsonKey(includeIfNull: false) double? temperature;
-  @JsonKey(includeIfNull: false) double? top_p;
-  @JsonKey(includeIfNull: false) int? presence_penalty;
-  @JsonKey(includeIfNull: false) ResponseFormat? response_format;
-  @JsonKey(includeIfNull: false) int? max_tokens;
-  @JsonKey(includeIfNull: false) int? n;
-  @JsonKey(includeIfNull: false) int? seed;
-  @JsonKey(includeIfNull: false) dynamic stop; /// String or List<> or null
-  @JsonKey(includeIfNull: false) List<Tool>? tools;
-  @JsonKey(includeIfNull: false) dynamic tool_choice; /// String or Tool
-  @JsonKey(includeIfNull: false) bool? parallel_tool_calls;
-  @JsonKey(includeIfNull: false) TranslationOptions? translation_options;
-  @JsonKey(includeIfNull: false) bool? enable_search;
-  @JsonKey(includeIfNull: false, name: "X-DashScope-DataInspection") String? x_dashScope_dataInspection;
+  bool? stream;
+  StreamOptions? stream_options;
+  List<String>? modalities;
+  double? temperature;
+  double? top_p;
+  int? presence_penalty;
+  ResponseFormat? response_format;
+  int? max_tokens;
+  int? n;
+  int? seed;
+  dynamic stop; /// String or List<> or null
+  List<Tool>? tools;
+  dynamic tool_choice; /// String or Tool
+  bool? parallel_tool_calls;
+  TranslationOptions? translation_options;
+  bool? enable_search;
+  @JsonKey(name: "X-DashScope-DataInspection") String? x_dashScope_dataInspection;
 
   ChatCompletionRequest({
     required this.model,
@@ -60,13 +60,13 @@ class RoleType {
   static final String TOOL = "tool";
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Message {
   String role;
   dynamic content; /// String or List<Content>
-  @JsonKey(includeIfNull: false) bool? partial;  /// for assistant
-  @JsonKey(includeIfNull: false) List<ToolCall>? tool_calls; /// for assistant
-  @JsonKey(includeIfNull: false) String? tool_call_id; /// for tool
+  bool? partial;  /// for assistant
+  List<ToolCall>? tool_calls; /// for assistant
+  String? tool_call_id; /// for tool
 
   Message({required this.role, required this.content, this.partial, this.tool_calls, this.tool_call_id});
 
@@ -75,12 +75,12 @@ class Message {
   Map<String, dynamic> toJson() => _$MessageToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Content {
   String type;
-  @JsonKey(includeIfNull: false) String? text;
-  @JsonKey(includeIfNull: false) String? image_url;
-  @JsonKey(includeIfNull: false) String? refusal;
+  String? text;
+  String? image_url;
+  String? refusal;
   Content({required this.type, this.text, this.refusal, this.image_url});
 
   factory Content.fromJson(Map<String, dynamic> json) => _$ContentFromJson(json);
@@ -88,7 +88,7 @@ class Content {
   Map<String, dynamic> toJson() => _$ContentToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class FunctionCalledModel {
   String name;
   String arguments;
@@ -100,7 +100,7 @@ class FunctionCalledModel {
   Map<String, dynamic> toJson() => _$FunctionCalledModelToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ToolCall {
   String id;
   String type;
@@ -113,11 +113,11 @@ class ToolCall {
   Map<String, dynamic> toJson() => _$ToolCallToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class FunctionModel {
   String name;
-  @JsonKey(includeIfNull: false) String? description;
-  @JsonKey(includeIfNull: false) Map<String, dynamic>? parameters;
+  String? description;
+  Map<String, dynamic>? parameters;
 
   FunctionModel({required this.name, this.description, this.parameters});
 
@@ -126,7 +126,7 @@ class FunctionModel {
   Map<String, dynamic> toJson() => _$FunctionModelToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ResponseFormat {
   String type;  /// `text`, `json_object`
 
@@ -137,9 +137,9 @@ class ResponseFormat {
   Map<String, dynamic> toJson() => _$ResponseFormatToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class StreamOptions {
-  @JsonKey(includeIfNull: false) bool? include_usage;
+  bool? include_usage;
 
   StreamOptions({required this.include_usage});
 
@@ -148,7 +148,7 @@ class StreamOptions {
   Map<String, dynamic> toJson() => _$StreamOptionsToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Tool {
   String type;
   FunctionModel function;
@@ -160,13 +160,13 @@ class Tool {
   Map<String, dynamic> toJson() => _$ToolToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class TranslationOptions {
   String source_lang;
   String target_lang;
-  @JsonKey(includeIfNull: false) List<Term>? terms;
-  @JsonKey(includeIfNull: false) List<Term>? tm_list;
-  @JsonKey(includeIfNull: false) String? domains;
+  List<Term>? terms;
+  List<Term>? tm_list;
+  String? domains;
 
   TranslationOptions({required this.source_lang, required this.target_lang, this.terms, this.tm_list, this.domains});
 
@@ -175,7 +175,7 @@ class TranslationOptions {
   Map<String, dynamic> toJson() => _$TranslationOptionsToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Term {
   String source;
   String target;

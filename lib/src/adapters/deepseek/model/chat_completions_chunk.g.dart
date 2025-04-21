@@ -24,7 +24,7 @@ Map<String, dynamic> _$ChatCompletionsChunkToJson(
   ChatCompletionsChunk instance,
 ) => <String, dynamic>{
   'id': instance.id,
-  'choices': instance.choices,
+  'choices': instance.choices.map((e) => e.toJson()).toList(),
   'created': instance.created,
   'model': instance.model,
   'system_fingerprint': instance.system_fingerprint,
@@ -38,7 +38,7 @@ Choice _$ChoiceFromJson(Map<String, dynamic> json) => Choice(
 );
 
 Map<String, dynamic> _$ChoiceToJson(Choice instance) => <String, dynamic>{
-  'delta': instance.delta,
+  'delta': instance.delta.toJson(),
   if (instance.finish_reason case final value?) 'finish_reason': value,
   'index': instance.index,
 };

@@ -4,39 +4,39 @@ part 'chat_completions_request.g.dart';
 
 /// https://platform.openai.com/docs/api-reference/chat/create
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ChatCompletionRequest {
   List<Message> messages;
   String model;
-  @JsonKey(includeIfNull: false) Audio? audio;
-  @JsonKey(includeIfNull: false) int? frequency_penalty;
-  @Deprecated('Deprecated in favor of tool_choice.') @JsonKey(includeIfNull: false) dynamic function_call;  /// String: `none`is the default when no functions are present; `auto` is the default if functions are present. Object: FunctionCall
-  @Deprecated('Deprecated in favor of tools..') @JsonKey(includeIfNull: false) List<FunctionModel>? functions;
-  @JsonKey(includeIfNull: false) Map<String, dynamic>? logit_bias;
-  @JsonKey(includeIfNull: false) bool? logprobs;
-  @JsonKey(includeIfNull: false) int? max_completion_tokens;
-  @Deprecated('This value is now deprecated in favor of max_completion_tokens') @JsonKey(includeIfNull: false) int? max_tokens;
-  @JsonKey(includeIfNull: false) Map<String, dynamic>? metadata;
-  @JsonKey(includeIfNull: false) List<String>? modalities;
-  @JsonKey(includeIfNull: false) int? n;
-  @JsonKey(includeIfNull: false) bool? parallel_tool_calls;
-  @JsonKey(includeIfNull: false) Prediction? prediction;
-  @JsonKey(includeIfNull: false) int? presence_penalty;
-  @JsonKey(includeIfNull: false) String? reasoning_effort; /// `low`, `medium`, `high`
-  @JsonKey(includeIfNull: false) ResponseFormat? response_format;
-  @JsonKey(includeIfNull: false) int? seed;
-  @JsonKey(includeIfNull: false) String? service_tier; /// `auto`, `default`
-  @JsonKey(includeIfNull: false) dynamic stop; /// String or List<> or null
-  @JsonKey(includeIfNull: false) bool? store;
-  @JsonKey(includeIfNull: false) bool? stream;
-  @JsonKey(includeIfNull: false) StreamOptions? stream_options;
-  @JsonKey(includeIfNull: false) double? temperature;
-  @JsonKey(includeIfNull: false) dynamic tool_choice; /// String or Tool
-  @JsonKey(includeIfNull: false) List<Tool>? tools;
-  @JsonKey(includeIfNull: false) int? top_logprobs;
-  @JsonKey(includeIfNull: false) double? top_p;
-  @JsonKey(includeIfNull: false) String? user;
-  @JsonKey(includeIfNull: false) WebSearchOptions? web_search_options;
+  Audio? audio;
+  int? frequency_penalty;
+  @Deprecated('Deprecated in favor of tool_choice.') dynamic function_call;  /// String: `none`is the default when no functions are present; `auto` is the default if functions are present. Object: FunctionCall
+  @Deprecated('Deprecated in favor of tools..') List<FunctionModel>? functions;
+  Map<String, dynamic>? logit_bias;
+  bool? logprobs;
+  int? max_completion_tokens;
+  @Deprecated('This value is now deprecated in favor of max_completion_tokens') int? max_tokens;
+  Map<String, dynamic>? metadata;
+  List<String>? modalities;
+  int? n;
+  bool? parallel_tool_calls;
+  Prediction? prediction;
+  int? presence_penalty;
+  String? reasoning_effort; /// `low`, `medium`, `high`
+  ResponseFormat? response_format;
+  int? seed;
+  String? service_tier; /// `auto`, `default`
+  dynamic stop; /// String or List<> or null
+  bool? store;
+  bool? stream;
+  StreamOptions? stream_options;
+  double? temperature;
+  dynamic tool_choice; /// String or Tool
+  List<Tool>? tools;
+  int? top_logprobs;
+  double? top_p;
+  String? user;
+  WebSearchOptions? web_search_options;
 
   ChatCompletionRequest({
     required this.messages,
@@ -86,15 +86,15 @@ class RoleType {
   static final String FUNCTION = "function";
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Message {
   String role;
   dynamic content; /// String or List<Content>
-  @JsonKey(includeIfNull: false) String? name;
-  @Deprecated('Deprecated and replaced by tool_calls.') @JsonKey(includeIfNull: false) FunctionCalledModel? function_call; /// for assistant
-  @JsonKey(includeIfNull: false) String? refusal;  /// for assistant
-  @JsonKey(includeIfNull: false) List<ToolCall>? tool_calls; /// for assistant
-  @JsonKey(includeIfNull: false) String? tool_call_id; /// for tool
+  String? name;
+  @Deprecated('Deprecated and replaced by tool_calls.') FunctionCalledModel? function_call; /// for assistant
+  String? refusal;  /// for assistant
+  List<ToolCall>? tool_calls; /// for assistant
+  String? tool_call_id; /// for tool
 
   Message({required this.role, required this.content, this.name, this.function_call, this.refusal, this.tool_calls, this.tool_call_id});
 
@@ -103,7 +103,7 @@ class Message {
   Map<String, dynamic> toJson() => _$MessageToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Audio {
   String format;  /// `wav`, `mp3`, `flac`, `opus`, or `pcm16`
   String voice;   /// `alloy`, `ash`, `ballad`, `coral`, `echo`, `sage`, and `shimmer`
@@ -115,12 +115,12 @@ class Audio {
   Map<String, dynamic> toJson() => _$AudioToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Content {
   String type;
-  @JsonKey(includeIfNull: false) String? text;
-  @JsonKey(includeIfNull: false) String? image_url;
-  @JsonKey(includeIfNull: false) String? refusal;
+  String? text;
+  String? image_url;
+  String? refusal;
   Content({required this.type, this.text, this.refusal, this.image_url});
 
   factory Content.fromJson(Map<String, dynamic> json) => _$ContentFromJson(json);
@@ -128,7 +128,7 @@ class Content {
   Map<String, dynamic> toJson() => _$ContentToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class FunctionCalledModel {
   String name;
   String arguments;
@@ -139,7 +139,7 @@ class FunctionCalledModel {
   Map<String, dynamic> toJson() => _$FunctionCalledModelToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ToolCall {
   FunctionCalledModel function;
   String id;
@@ -153,7 +153,7 @@ class ToolCall {
 }
 
 @Deprecated('Deprecated in favor of tool_choice.')
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class FunctionCall {
   String name;
   FunctionCall({required this.name});
@@ -163,12 +163,12 @@ class FunctionCall {
   Map<String, dynamic> toJson() => _$FunctionCallToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class FunctionModel {
   String name;
-  @JsonKey(includeIfNull: false) String? description;
-  @JsonKey(includeIfNull: false) Map<String, dynamic>? parameters;
-  @JsonKey(includeIfNull: false) bool? strict;
+  String? description;
+  Map<String, dynamic>? parameters;
+  bool? strict;
 
   FunctionModel({required this.name, this.description, this.parameters, this.strict});
 
@@ -177,7 +177,7 @@ class FunctionModel {
   Map<String, dynamic> toJson() => _$FunctionModelToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Prediction {
   String type;
   dynamic content; /// String or List<Content>
@@ -190,10 +190,10 @@ class Prediction {
 }
 
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ResponseFormat {
   String type;  /// `text`, `json_schema`, `json_object`
-  @JsonKey(includeIfNull: false) JsonSchema? json_schema; /// String or List<Content>
+  JsonSchema? json_schema; /// String or List<Content>
 
   ResponseFormat({required this.type, this.json_schema});
 
@@ -202,12 +202,12 @@ class ResponseFormat {
   Map<String, dynamic> toJson() => _$ResponseFormatToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class JsonSchema {
   String name;
-  @JsonKey(includeIfNull: false) String? description;
+  String? description;
   Map<String, dynamic>? schema;
-  @JsonKey(includeIfNull: false) bool? strict;
+  bool? strict;
 
   JsonSchema({required this.name, this.description, this.schema, this.strict});
 
@@ -216,9 +216,9 @@ class JsonSchema {
   Map<String, dynamic> toJson() => _$JsonSchemaToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class StreamOptions {
-  @JsonKey(includeIfNull: false) bool? include_usage;
+  bool? include_usage;
 
   StreamOptions({required this.include_usage});
 
@@ -227,7 +227,7 @@ class StreamOptions {
   Map<String, dynamic> toJson() => _$StreamOptionsToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Tool {
   String type;
   FunctionModel function;
@@ -239,10 +239,10 @@ class Tool {
   Map<String, dynamic> toJson() => _$ToolToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class WebSearchOptions {
-  @JsonKey(includeIfNull: false) String? search_context_size;  ///low, medium, high
-  @JsonKey(includeIfNull: false) UserLocation? user_location;
+  String? search_context_size;  ///low, medium, high
+  UserLocation? user_location;
 
   WebSearchOptions({this.search_context_size, this.user_location});
 
@@ -251,7 +251,7 @@ class WebSearchOptions {
   Map<String, dynamic> toJson() => _$WebSearchOptionsToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class UserLocation {
   String type;  /// `approximate`
   Approximate approximate;
@@ -263,12 +263,12 @@ class UserLocation {
   Map<String, dynamic> toJson() => _$UserLocationToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Approximate {
-  @JsonKey(includeIfNull: false) String? city;
-  @JsonKey(includeIfNull: false) String? country;
-  @JsonKey(includeIfNull: false) String? region;
-  @JsonKey(includeIfNull: false) String? timezone;
+  String? city;
+  String? country;
+  String? region;
+  String? timezone;
 
   Approximate({this.city, this.country, this.region, this.timezone});
 

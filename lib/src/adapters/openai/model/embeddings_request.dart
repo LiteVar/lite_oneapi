@@ -4,7 +4,7 @@ part 'embeddings_request.g.dart';
 
 /// https://platform.openai.com/docs/api-reference/embeddings/create
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class EmbeddingsRequest {
   dynamic input; /// String or List<String> or List<int> or List<List<int>>
   String model;

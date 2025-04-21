@@ -4,7 +4,7 @@ part 'embeddings_response.g.dart';
 
 /// https://platform.openai.com/docs/api-reference/embeddings/object
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class EmbeddingsResponse {
   List<double> embedding;
   int index;

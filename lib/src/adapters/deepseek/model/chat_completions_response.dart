@@ -4,7 +4,7 @@ part 'chat_completions_response.g.dart';
 
 /// https://api-docs.deepseek.com/zh-cn/api/create-chat-completion#responses
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ChatCompletionsResponse {
   String id;
   List<Choice> choices;
@@ -29,7 +29,7 @@ class ChatCompletionsResponse {
   Map<String, dynamic> toJson() => _$ChatCompletionsResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Choice {
   String finish_reason;
   String index;
@@ -43,7 +43,7 @@ class Choice {
   Map<String, dynamic> toJson() => _$ChoiceToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Logprobs {
   List<Logprob>? content;
   List<Logprob>? refusal;
@@ -55,7 +55,7 @@ class Logprobs {
   Map<String, dynamic> toJson() => _$LogprobsToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Logprob {
   List<int>? bytes;
   int logprob;
@@ -69,7 +69,7 @@ class Logprob {
   Map<String, dynamic> toJson() => _$LogprobToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class TopLogrob {
   List<int>? bytes;
   int logprob;
@@ -83,7 +83,7 @@ class TopLogrob {
   Map<String, dynamic> toJson() => _$TopLogrobToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Message {
   String? content;
   String? refusal;
@@ -101,7 +101,7 @@ class Message {
   Map<String, dynamic> toJson() => _$MessageToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Annotation {
   String type;  /// `url_citation`
   UrlCitation url_citation;
@@ -113,7 +113,7 @@ class Annotation {
   Map<String, dynamic> toJson() => _$AnnotationToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Audio {
   String data;
   int expires_at;
@@ -127,7 +127,7 @@ class Audio {
   Map<String, dynamic> toJson() => _$AudioToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class UrlCitation {
   int end_index;
   int start_index;
@@ -141,7 +141,7 @@ class UrlCitation {
   Map<String, dynamic> toJson() => _$UrlCitationToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class FunctionModelOld {
   String name;
   Map<String, dynamic> arguments;
@@ -152,7 +152,7 @@ class FunctionModelOld {
   Map<String, dynamic> toJson() => _$FunctionModelOldToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ToolCall {
   String id;
   String type;
@@ -163,7 +163,7 @@ class ToolCall {
   Map<String, dynamic> toJson() => _$ToolCallToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Usage {
   int completion_tokens;
   int prompt_tokens;
@@ -179,7 +179,7 @@ class Usage {
   Map<String, dynamic> toJson() => _$UsageToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class CompletionTokensDetails {
   int reasoning_tokens;
 

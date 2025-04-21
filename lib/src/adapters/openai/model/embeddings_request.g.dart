@@ -17,7 +17,7 @@ EmbeddingsRequest _$EmbeddingsRequestFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$EmbeddingsRequestToJson(EmbeddingsRequest instance) =>
     <String, dynamic>{
-      'input': instance.input,
+      if (instance.input case final value?) 'input': value,
       'model': instance.model,
       if (instance.dimensions case final value?) 'dimensions': value,
       if (instance.response_format case final value?) 'response_format': value,

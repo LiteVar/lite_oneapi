@@ -35,9 +35,9 @@ Map<String, dynamic> _$AudioTranscriptionsVerboseResponseToJson(
 ) => <String, dynamic>{
   'duration': instance.duration,
   'language': instance.language,
-  'segments': instance.segments,
+  'segments': instance.segments.map((e) => e.toJson()).toList(),
   'text': instance.text,
-  'words': instance.words,
+  'words': instance.words.map((e) => e.toJson()).toList(),
 };
 
 Segment _$SegmentFromJson(Map<String, dynamic> json) => Segment(

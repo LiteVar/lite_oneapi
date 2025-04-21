@@ -4,7 +4,7 @@ part 'chat_completions_chunk.g.dart';
 
 /// https://api-docs.deepseek.com/zh-cn/api/create-chat-completion#responses
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ChatCompletionsChunk {
   String id;
   List<Choice> choices;
@@ -27,10 +27,10 @@ class ChatCompletionsChunk {
   Map<String, dynamic> toJson() => _$ChatCompletionsChunkToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Choice {
   Delta delta;
-  @JsonKey(includeIfNull: false) String? finish_reason; /// `stop`, `length`, `content_filter`, `tool_calls`
+  String? finish_reason; /// `stop`, `length`, `content_filter`, `tool_calls`
   String index;
 
   Choice({required this.delta, required this.finish_reason, required this.index});
@@ -40,7 +40,7 @@ class Choice {
   Map<String, dynamic> toJson() => _$ChoiceToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Delta {
   String content;
   String reasoning_content;

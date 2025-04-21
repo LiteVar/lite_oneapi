@@ -4,23 +4,23 @@ part 'chat_completions_request.g.dart';
 
 /// https://api-docs.deepseek.com/zh-cn/api/create-chat-completion#request
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ChatCompletionRequest {
   List<Message> messages;
   String model;
-  @JsonKey(includeIfNull: false) int? frequency_penalty;
-  @JsonKey(includeIfNull: false) int? max_tokens;
-  @JsonKey(includeIfNull: false) int? presence_penalty;
-  @JsonKey(includeIfNull: false) ResponseFormat? response_format;
-  @JsonKey(includeIfNull: false) dynamic stop; /// String or List<String> or null
-  @JsonKey(includeIfNull: false) bool? stream;
-  @JsonKey(includeIfNull: false) StreamOptions? stream_options;
-  @JsonKey(includeIfNull: false) double? temperature;
-  @JsonKey(includeIfNull: false) double? top_p;
-  @JsonKey(includeIfNull: false) List<Tool>? tools;
-  @JsonKey(includeIfNull: false) dynamic tool_choice; /// String: `none`, `auto`, `required` or Tool
-  @JsonKey(includeIfNull: false) bool? logprobs;
-  @JsonKey(includeIfNull: false) int? top_logprobs;
+  int? frequency_penalty;
+  int? max_tokens;
+  int? presence_penalty;
+  ResponseFormat? response_format;
+  dynamic stop; /// String or List<String> or null
+  bool? stream;
+  StreamOptions? stream_options;
+  double? temperature;
+  double? top_p;
+  List<Tool>? tools;
+  dynamic tool_choice; /// String: `none`, `auto`, `required` or Tool
+  bool? logprobs;
+  int? top_logprobs;
 
   ChatCompletionRequest({
     required this.messages,
@@ -52,15 +52,15 @@ class RoleType {
   static final String TOOL = "tool";
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Message {
   String role;
   String content;
-  @JsonKey(includeIfNull: false) String? name;
-  @JsonKey(includeIfNull: false) bool? prefix;  /// for assistant
-  @JsonKey(includeIfNull: false) String? reasoning_content; /// for assistant
-  @JsonKey(includeIfNull: false) List<ToolCall>? tool_calls; /// for assistant, NOT show in official docs!!!
-  @JsonKey(includeIfNull: false) String? tool_call_id; /// for tool
+  String? name;
+  bool? prefix;  /// for assistant
+  String? reasoning_content; /// for assistant
+  List<ToolCall>? tool_calls; /// for assistant, NOT show in official docs!!!
+  String? tool_call_id; /// for tool
 
   Message({required this.role, required this.content, this.name, this.prefix, this.reasoning_content, this.tool_calls, this.tool_call_id});
 
@@ -69,7 +69,7 @@ class Message {
   Map<String, dynamic> toJson() => _$MessageToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class FunctionCalledModel {
   String name;
   String arguments;
@@ -80,7 +80,7 @@ class FunctionCalledModel {
   Map<String, dynamic> toJson() => _$FunctionCalledModelToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ToolCall {
   FunctionCalledModel function;
   String id;
@@ -93,12 +93,12 @@ class ToolCall {
   Map<String, dynamic> toJson() => _$ToolCallToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class FunctionModel {
   String name;
-  @JsonKey(includeIfNull: false) String? description;
-  @JsonKey(includeIfNull: false) Map<String, dynamic>? parameters;
-  @JsonKey(includeIfNull: false) bool? strict;
+  String? description;
+  Map<String, dynamic>? parameters;
+  bool? strict;
 
   FunctionModel({required this.name, this.description, this.parameters, this.strict});
 
@@ -107,7 +107,7 @@ class FunctionModel {
   Map<String, dynamic> toJson() => _$FunctionModelToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ResponseFormat {
   String type;  /// `text`, `json_object`
 
@@ -118,9 +118,9 @@ class ResponseFormat {
   Map<String, dynamic> toJson() => _$ResponseFormatToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class StreamOptions {
-  @JsonKey(includeIfNull: false) bool? include_usage;
+  bool? include_usage;
 
   StreamOptions({required this.include_usage});
 
@@ -129,7 +129,7 @@ class StreamOptions {
   Map<String, dynamic> toJson() => _$StreamOptionsToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Tool {
   String type;  /// `function`
   FunctionModel function;

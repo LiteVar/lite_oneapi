@@ -4,16 +4,16 @@ part 'chat_completions_chunk.g.dart';
 
 /// https://help.aliyun.com/zh/model-studio/developer-reference/use-qwen-by-calling-api#f0b9c155ad0e0
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ChatCompletionsChunk {
   String id;
   List<Choice> choices;
   int created;
   String model;
   String object;  /// `chat.completion.chunk`
-  @JsonKey(includeIfNull: false) String? service_tier;  /// null
-  @JsonKey(includeIfNull: false) String? system_fingerprint; /// null
-  @JsonKey(includeIfNull: false) Usage? usage;
+  String? service_tier;  /// null
+  String? system_fingerprint; /// null
+  Usage? usage;
 
   ChatCompletionsChunk({
     required this.id,
@@ -31,10 +31,10 @@ class ChatCompletionsChunk {
   Map<String, dynamic> toJson() => _$ChatCompletionsChunkToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Choice {
   Delta delta;
-  @JsonKey(includeIfNull: false) String? finish_reason; /// `stop`, `null`, `length`, `tool_calls`
+  String? finish_reason; /// `stop`, `null`, `length`, `tool_calls`
   String index;
 
   Choice({required this.delta, required this.finish_reason, required this.index});
@@ -44,14 +44,14 @@ class Choice {
   Map<String, dynamic> toJson() => _$ChoiceToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Delta {
   String content;
   String reasoning_content;
-  @JsonKey(includeIfNull: false) FunctionCalledModel? function_call;  /// null
-  @JsonKey(includeIfNull: false) String? refusal; /// null
+  FunctionCalledModel? function_call;  /// null
+  String? refusal; /// null
   String role;  /// `assistant`
-  @JsonKey(includeIfNull: false) List<ToolCall>? tools_calls;
+  List<ToolCall>? tools_calls;
 
   Delta({required this.content, required this.reasoning_content, required this.role});
 
@@ -60,7 +60,7 @@ class Delta {
   Map<String, dynamic> toJson() => _$DeltaToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class FunctionCalledModel {
   String name;
   Map<String, dynamic> arguments;
@@ -72,7 +72,7 @@ class FunctionCalledModel {
   Map<String, dynamic> toJson() => _$FunctionCalledModelToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ToolCall {
   String id;
   String type;
@@ -85,12 +85,12 @@ class ToolCall {
   Map<String, dynamic> toJson() => _$ToolCallToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Usage {
   int completion_tokens;
   int prompt_tokens;
   int total_tokens;
-  @JsonKey(includeIfNull: false) CompletionTokensDetails? completion_tokens_details;
+  CompletionTokensDetails? completion_tokens_details;
   PromptTokensDetails prompt_tokens_details;
 
   Usage({required this.completion_tokens, required this.prompt_tokens, required this.total_tokens, required this.completion_tokens_details, required this.prompt_tokens_details});
@@ -100,7 +100,7 @@ class Usage {
   Map<String, dynamic> toJson() => _$UsageToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class CompletionTokensDetails {
   int text_tokens;
 
@@ -111,12 +111,12 @@ class CompletionTokensDetails {
   Map<String, dynamic> toJson() => _$CompletionTokensDetailsToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class PromptTokensDetails {
-  @JsonKey(includeIfNull: false) int? audio_tokens;
-  @JsonKey(includeIfNull: false) int? text_tokens;
-  @JsonKey(includeIfNull: false) int? video_tokens;
-  @JsonKey(includeIfNull: false) int? image_tokens;
+  int? audio_tokens;
+  int? text_tokens;
+  int? video_tokens;
+  int? image_tokens;
   int cached_tokens;
 
   PromptTokensDetails({this.audio_tokens, this.text_tokens, this.video_tokens, this.image_tokens, required this.cached_tokens});

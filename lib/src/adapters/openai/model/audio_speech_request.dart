@@ -4,13 +4,13 @@ part 'audio_speech_request.g.dart';
 
 /// https://platform.openai.com/docs/api-reference/audio/createSpeech
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class AudioSpeechRequest {
   String input;
   String model;
   String voice; /// `alloy`, `ash`, `coral`, `echo`, `fable`, `onyx`, `nova`, `sage` and `shimmer`
-  @JsonKey(includeIfNull: false) String? response_format; /// `mp3`, `opus`, `aac`, `flac`, `wav`, and `pcm`
-  @JsonKey(includeIfNull: false) double? speed;  /// 0.25 to 4.0
+  String? response_format; /// `mp3`, `opus`, `aac`, `flac`, `wav`, and `pcm`
+  double? speed;  /// 0.25 to 4.0
 
   AudioSpeechRequest({
     required this.input,

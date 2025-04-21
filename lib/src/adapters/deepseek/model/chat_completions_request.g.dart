@@ -45,18 +45,21 @@ ChatCompletionRequest _$ChatCompletionRequestFromJson(
 Map<String, dynamic> _$ChatCompletionRequestToJson(
   ChatCompletionRequest instance,
 ) => <String, dynamic>{
-  'messages': instance.messages,
+  'messages': instance.messages.map((e) => e.toJson()).toList(),
   'model': instance.model,
   if (instance.frequency_penalty case final value?) 'frequency_penalty': value,
   if (instance.max_tokens case final value?) 'max_tokens': value,
   if (instance.presence_penalty case final value?) 'presence_penalty': value,
-  if (instance.response_format case final value?) 'response_format': value,
+  if (instance.response_format?.toJson() case final value?)
+    'response_format': value,
   if (instance.stop case final value?) 'stop': value,
   if (instance.stream case final value?) 'stream': value,
-  if (instance.stream_options case final value?) 'stream_options': value,
+  if (instance.stream_options?.toJson() case final value?)
+    'stream_options': value,
   if (instance.temperature case final value?) 'temperature': value,
   if (instance.top_p case final value?) 'top_p': value,
-  if (instance.tools case final value?) 'tools': value,
+  if (instance.tools?.map((e) => e.toJson()).toList() case final value?)
+    'tools': value,
   if (instance.tool_choice case final value?) 'tool_choice': value,
   if (instance.logprobs case final value?) 'logprobs': value,
   if (instance.top_logprobs case final value?) 'top_logprobs': value,
@@ -81,7 +84,8 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   if (instance.name case final value?) 'name': value,
   if (instance.prefix case final value?) 'prefix': value,
   if (instance.reasoning_content case final value?) 'reasoning_content': value,
-  if (instance.tool_calls case final value?) 'tool_calls': value,
+  if (instance.tool_calls?.map((e) => e.toJson()).toList() case final value?)
+    'tool_calls': value,
   if (instance.tool_call_id case final value?) 'tool_call_id': value,
 };
 
@@ -104,7 +108,7 @@ ToolCall _$ToolCallFromJson(Map<String, dynamic> json) => ToolCall(
 );
 
 Map<String, dynamic> _$ToolCallToJson(ToolCall instance) => <String, dynamic>{
-  'function': instance.function,
+  'function': instance.function.toJson(),
   'id': instance.id,
   'type': instance.type,
 };
@@ -146,5 +150,5 @@ Tool _$ToolFromJson(Map<String, dynamic> json) => Tool(
 
 Map<String, dynamic> _$ToolToJson(Tool instance) => <String, dynamic>{
   'type': instance.type,
-  'function': instance.function,
+  'function': instance.function.toJson(),
 };

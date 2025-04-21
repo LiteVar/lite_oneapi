@@ -4,15 +4,15 @@ part 'audio_transcriptions_request.g.dart';
 
 /// https://platform.openai.com/docs/api-reference/audio/createTranscription
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class AudioTranscriptionsRequest {
   String file;
   String model;
-  @JsonKey(includeIfNull: false) String? language;
-  @JsonKey(includeIfNull: false) String? prompt;
-  @JsonKey(includeIfNull: false) String? response_format; /// `json`, `text`, `srt`, `verbose_json`, or `vtt`
-  @JsonKey(includeIfNull: false) double? temperature;
-  @JsonKey(includeIfNull: false) List<String>? timestamp_granularities;
+  String? language;
+  String? prompt;
+  String? response_format; /// `json`, `text`, `srt`, `verbose_json`, or `vtt`
+  double? temperature;
+  List<String>? timestamp_granularities;
 
   AudioTranscriptionsRequest({
     required this.file,

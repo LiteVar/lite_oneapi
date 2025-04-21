@@ -4,14 +4,14 @@ part 'chat_completions_response.g.dart';
 
 /// https://help.aliyun.com/zh/model-studio/developer-reference/use-qwen-by-calling-api#182c685357r7w
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ChatCompletionsResponse {
   String id;
   List<Choice> choices;
   int created;
   String model;
   String object;  /// `chat.completion`
-  @JsonKey(includeIfNull: false) String? service_tier;
+  String? service_tier;
   String system_fingerprint;
   Usage usage;
 
@@ -31,11 +31,11 @@ class ChatCompletionsResponse {
   Map<String, dynamic> toJson() => _$ChatCompletionsResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Choice {
   String finish_reason; /// `stop`, `length`, `tool_calls`
   String index;
-  @JsonKey(includeIfNull: false) Logprobs? logprobs;  /// null
+  Logprobs? logprobs;  /// null
   Message message;
 
   Choice({required this.finish_reason, required this.index, this.logprobs, required this.message});
@@ -45,10 +45,10 @@ class Choice {
   Map<String, dynamic> toJson() => _$ChoiceToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Logprobs {
-  @JsonKey(includeIfNull: false) List<Logprob>? content;
-  @JsonKey(includeIfNull: false) List<Logprob>? refusal;
+  List<Logprob>? content;
+  List<Logprob>? refusal;
 
   Logprobs({this.content, this.refusal});
 
@@ -57,9 +57,9 @@ class Logprobs {
   Map<String, dynamic> toJson() => _$LogprobsToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Logprob {
-  @JsonKey(includeIfNull: false) List<int>? bytes;
+  List<int>? bytes;
   int logprob;
   String token;
   List<TopLogrob> top_logprobs;
@@ -71,9 +71,9 @@ class Logprob {
   Map<String, dynamic> toJson() => _$LogprobToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class TopLogrob {
-  @JsonKey(includeIfNull: false) List<int>? bytes;
+  List<int>? bytes;
   int logprob;
   String token;
   List<TopLogrob> top_logprobs;
@@ -85,14 +85,14 @@ class TopLogrob {
   Map<String, dynamic> toJson() => _$TopLogrobToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Message {
-  @JsonKey(includeIfNull: false) String? content;
-  @JsonKey(includeIfNull: false) String? refusal; /// null
+  String? content;
+  String? refusal; /// null
   String role;
-  @JsonKey(includeIfNull: false) Audio? audio;  /// null
-  @Deprecated('Deprecated and replaced by tool_calls.') @JsonKey(includeIfNull: false) FunctionCalledModel? function_call;  /// nul
-  @JsonKey(includeIfNull: false) List<ToolCall>? tool_calls;
+  Audio? audio;  /// null
+  @Deprecated('Deprecated and replaced by tool_calls.') FunctionCalledModel? function_call;  /// nul
+  List<ToolCall>? tool_calls;
 
   Message({this.content, this.refusal, required this.role, this.audio, this.function_call, this.tool_calls});
 
@@ -101,7 +101,7 @@ class Message {
   Map<String, dynamic> toJson() => _$MessageToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Audio {
   String data;
   int expires_at;
@@ -115,7 +115,7 @@ class Audio {
   Map<String, dynamic> toJson() => _$AudioToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class FunctionCalledModel {
   String name;
   Map<String, dynamic> arguments;
@@ -127,7 +127,7 @@ class FunctionCalledModel {
   Map<String, dynamic> toJson() => _$FunctionCalledModelToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class ToolCall {
   String id;
   String type;
@@ -140,12 +140,12 @@ class ToolCall {
   Map<String, dynamic> toJson() => _$ToolCallToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Usage {
   int completion_tokens;
   int prompt_tokens;
   int total_tokens;
-  @JsonKey(includeIfNull: false) CompletionTokensDetails? completion_tokens_details;  /// null
+  CompletionTokensDetails? completion_tokens_details;  /// null
   PromptTokensDetails prompt_tokens_details;
 
   Usage({required this.completion_tokens, required this.prompt_tokens, required this.total_tokens, required this.completion_tokens_details, required this.prompt_tokens_details});
@@ -155,7 +155,7 @@ class Usage {
   Map<String, dynamic> toJson() => _$UsageToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class CompletionTokensDetails {
   int accepted_prediction_tokens;
   int audio_tokens;
@@ -169,9 +169,9 @@ class CompletionTokensDetails {
   Map<String, dynamic> toJson() => _$CompletionTokensDetailsToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class PromptTokensDetails {
-  @JsonKey(includeIfNull: false) int? audio_tokens;  /// null
+  int? audio_tokens;  /// null
   int cached_tokens;
 
   PromptTokensDetails({required this.audio_tokens, required this.cached_tokens});

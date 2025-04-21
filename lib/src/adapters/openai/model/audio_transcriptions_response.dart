@@ -4,7 +4,7 @@ part 'audio_transcriptions_response.g.dart';
 
 /// https://platform.openai.com/docs/api-reference/audio/json-object
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class AudioTranscriptionsResponse {
   String text;
 
@@ -17,7 +17,7 @@ class AudioTranscriptionsResponse {
   Map<String, dynamic> toJson() => _$AudioTranscriptionsResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class AudioTranscriptionsVerboseResponse {
   double duration;
   String language;
@@ -38,7 +38,7 @@ class AudioTranscriptionsVerboseResponse {
   Map<String, dynamic> toJson() => _$AudioTranscriptionsVerboseResponseToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Segment {
   double avg_logprob;
   double compression_ratio;
@@ -69,7 +69,7 @@ class Segment {
   Map<String, dynamic> toJson() => _$SegmentToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Word {
   double end;
   double start;
