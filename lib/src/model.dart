@@ -28,9 +28,10 @@ class LLMModel {
 class Config {
   late String version;
   late Server server;
+  late Mode? mode;
   late Log log;
 
-  Config({required this.server, required this.log, this.version = "0.0.0"});
+  Config({required this.server, required this.log, this.mode, this.version = "0.0.0"});
 
   factory Config.fromJson(Map<String, dynamic> json) => _$ConfigFromJson(json);
 }
@@ -43,6 +44,15 @@ class Server {
   Server({this.ip = "0.0.0.0", this.port = 9517});
 
   factory Server.fromJson(Map<String, dynamic> json) => _$ServerFromJson(json);
+}
+
+@JsonSerializable(createToJson: false)
+class Mode {
+  late bool? transparent; /// false | null - USE env.json to convert ApiKey; true - NOT USE env.json, use Original ApiKey, NOT check ApiKey
+
+  Mode();
+
+  factory Mode.fromJson(Map<String, dynamic> json) => _$ModeFromJson(json);
 }
 
 class Log {

@@ -4,6 +4,9 @@
     "ip": "0.0.0.0",
     "port": 9517
   },
+  "mode": {
+    "transparent": false
+  },
   "log": {
     "level": "INFO"
   }

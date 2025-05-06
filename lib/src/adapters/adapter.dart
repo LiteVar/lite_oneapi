@@ -54,20 +54,28 @@ abstract class LLMAdapter {
     });
 
     String? authorizationKey = null;
-    switch(meta.indexApiKey.type) {
-      case ApiKeyType.basic: authorizationKey = "Basic ${meta.indexApiKey.apiKey}";break;
-      case ApiKeyType.bearer: authorizationKey = "Bearer ${meta.indexApiKey.apiKey}";break;
-      case ApiKeyType.none: authorizationKey = null;break;
-    }
-    if(authorizationKey != null) {
-      newHeaders["Authorization"] = authorizationKey;
+
+    if((config.mode != null && config.mode!.transparent == true) || env == null) {
+      newHeaders["Authorization"] = meta.originalApiKeyWithBearer;
+    } else {
+      switch(meta.indexApiKey!.type) {
+        case ApiKeyType.basic: authorizationKey = "Basic ${meta.indexApiKey!.apiKey}";break;
+        case ApiKeyType.bearer: authorizationKey = "Bearer ${meta.indexApiKey!.apiKey}";break;
+        case ApiKeyType.none: authorizationKey = null;break;
+      }
+      if(authorizationKey != null) {
+        newHeaders["Authorization"] = authorizationKey;
+      }
     }
 
     return newHeaders;
   }
 
   void _releaseApiKey(Meta meta) {
-    adapterKeyPools[meta.adapterName]?.release(meta.indexApiKey.id);
+    if((config.mode != null && config.mode!.transparent == true) || env == null) {
+      return ;
+    }
+    adapterKeyPools![meta.adapterName]?.release(meta.indexApiKey!.id);
   }
 }
 

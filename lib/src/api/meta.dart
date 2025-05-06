@@ -13,7 +13,8 @@ class Meta {
 
   late String adapterName;
   late String baseUrl;
-  late IndexApiKey indexApiKey;
+  late String originalApiKeyWithBearer;
+  late IndexApiKey? indexApiKey;
   late RelayMode mode;
 
   Meta({required this.model, required this.isStream, required this.requestBody});
@@ -25,6 +26,12 @@ HandleMeta<ModelInfo> initModelInfo = (Meta meta, ModelInfo data) {
   meta.adapterName = data.adapter;
   meta.baseUrl = data.baseUrl;
   logger.log(LogModule.api, "initModelInfo", detail: "adapter: ${data.adapter}, baseUrl: ${data.baseUrl}", level: Level.FINEST);
+  return meta;
+};
+
+HandleMeta<String> initOriginalApiKeyWithBearer = (Meta meta, String data) {
+  meta.originalApiKeyWithBearer = data;
+  logger.log(LogModule.api, "initOriginalApiKeyWithBearer", detail: "originalApiKeyWithBearer: ${data}", level: Level.FINEST);
   return meta;
 };
 

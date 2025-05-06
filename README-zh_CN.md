@@ -18,7 +18,7 @@
 
 ### 使用方法
 
-1. 在`/bin/server.dart`同级目录，创建`env.json`，格式如下：
+1. 如果使用`ApiKey`转换，则需要在`/bin/server.dart`同级目录，创建`env.json`，格式如下：
 
     ```json
     {
@@ -47,8 +47,8 @@
       }
     }
     ```
-   
-   - 每个大模型平台下，支持多个ApiKey，系统会自动选择没有被占用的ApiKey进行请求，请求后立刻释放 
+   - 每个大模型平台下，支持多个ApiKey，系统会自动选择没有被占用的ApiKey进行请求，请求后立刻释放
+   - 如果直接使用透传模式，则不需要创建`env.json`文件，或是config.json中，具有`mode`字段，`transparent`为`true`
 
 2. 运行`server.dart`
 3. 客户端使用OpenAI API发起请求

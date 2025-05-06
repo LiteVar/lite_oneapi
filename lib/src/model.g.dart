@@ -22,6 +22,10 @@ LLMModel _$LLMModelFromJson(Map<String, dynamic> json) => LLMModel(
 Config _$ConfigFromJson(Map<String, dynamic> json) => Config(
   server: Server.fromJson(json['server'] as Map<String, dynamic>),
   log: Log.fromJson(json['log'] as Map<String, dynamic>),
+  mode:
+      json['mode'] == null
+          ? null
+          : Mode.fromJson(json['mode'] as Map<String, dynamic>),
   version: json['version'] as String? ?? "0.0.0",
 );
 
@@ -29,6 +33,9 @@ Server _$ServerFromJson(Map<String, dynamic> json) => Server(
   ip: json['ip'] as String? ?? "0.0.0.0",
   port: (json['port'] as num?)?.toInt() ?? 9517,
 );
+
+Mode _$ModeFromJson(Map<String, dynamic> json) =>
+    Mode()..transparent = json['transparent'] as bool?;
 
 Env _$EnvFromJson(Map<String, dynamic> json) => Env(
   apiKeys:

@@ -31,9 +31,13 @@ class OneApiController {
 
       LLMAdapter? adapter = channelAdapterMapper[modelInfo.adapter];
       if (adapter == null) throw AdapterNotFoundException(model);
-      IndexItem<ApiKey> indexApiKey = adapterKeyPools[meta.adapterName]!.fetch();
-      meta = initIndexApiKey(meta, indexApiKey);
 
+      String originalApiKeyWithBearer = request.headers["Authorization"]??"";
+      meta = initOriginalApiKeyWithBearer(meta, originalApiKeyWithBearer);
+      if(adapterKeyPools != null) {
+        IndexItem<ApiKey> indexApiKey = adapterKeyPools![meta.adapterName]!.fetch();
+        meta = initIndexApiKey(meta, indexApiKey);
+      }
       meta = initRelayMode(meta, request.url.path);
 
       adapter.init(meta);

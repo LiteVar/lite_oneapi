@@ -17,8 +17,8 @@ Map<String, LLMAdapter> channelAdapterMapper = {
 
 final Config config = initConfig();
 final ModelMapping modelMapping = initModelMapping();
-final Env env = initEnv();
-final Map<String, Pool<ApiKey>> adapterKeyPools = initApiKeyPool();
+final Env? env = initEnv();
+final Map<String, Pool<ApiKey>>? adapterKeyPools = initApiKeyPool();
 
 ModelMapping initModelMapping() {
   String exeDir = Dir.executableDir();
@@ -38,7 +38,7 @@ Config initConfig() {
   return config;
 }
 
-Env initEnv() {
+Env? initEnv() {
   try {
     String exeDir = Dir.executableDir();
     String envFilePath = '$exeDir${Platform.pathSeparator}env.json';
@@ -47,14 +47,17 @@ Env initEnv() {
     final Env env = Env.fromJson(configJson);
     return env;
   } catch(e) {
-    return Env();
+    return null;
   }
 }
 
-Map<String, Pool<ApiKey>> initApiKeyPool() {
+Map<String, Pool<ApiKey>>? initApiKeyPool() {
   Map<String, Pool<ApiKey>> pools = {};
-  env.adapterKeys.forEach((key, value) {
-    pools[key] = Pool(value);
-  });
-  return pools;
+  if(env != null) {
+    env!.adapterKeys.forEach((key, value) {
+      pools[key] = Pool(value);
+    });
+    return pools;
+  }
+  return null;
 }

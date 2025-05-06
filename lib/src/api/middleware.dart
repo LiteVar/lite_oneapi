@@ -4,12 +4,14 @@ import '../config.dart';
 import '../utils/logger.dart';
 
 Middleware checkAuthorization() {
-  List<String> apiKeys = env.apiKeys;
   return (Handler innerHandler) {
     return (Request request) async {
+      if((config.mode != null && config.mode!.transparent == true) || env == null) {
+        return innerHandler(request);
+      }
       final authorizationHeader = request.headers['Authorization'];
       final tokenPrefix = "Bearer ";
-
+      List<String> apiKeys = env!.apiKeys;
       if(apiKeys.isNotEmpty) {
         if (authorizationHeader != null) {
           for(String apiKey in apiKeys) {

@@ -18,7 +18,7 @@ For details, see: `/bin/model_mapping.json`
 
 ### How to Use
 
-1. In the same directory as `/bin/server.dart`, create an `env.json` file with the following format:
+1. If need `ApiKey` converting, in the same directory as `/bin/server.dart`, create an `env.json` file with the following format:
 
     ```json
     {
@@ -49,6 +49,7 @@ For details, see: `/bin/model_mapping.json`
     ```
 
     - Each model platform supports multiple API keys. The system automatically selects an available API key for the request and releases it immediately after use.
+    - If NOT converting, NOT need `env.json` file. Or in the `config.json` file, add `mode` field, `transparent` to be `true`.
 
 2. Run `server.dart`
 3. The client sends requests using the OpenAI API.
