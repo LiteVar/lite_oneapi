@@ -7,7 +7,8 @@ import 'package:dart_openai_sdk/dart_openai_sdk.dart'
         OpenAIChatCompletionChoiceMessageModel,
         OpenAIChatCompletionModel,
         OpenAIStreamChatCompletionModel,
-        OpenAIToolModel;
+        OpenAIToolModel,
+        RequestFailedException;
 import 'package:dart_openai_sdk/src/instance/chat/chat.dart' show OpenAIChat;
 import 'package:http/http.dart' as http;
 
@@ -16,6 +17,7 @@ import '../builder/chat_request.dart';
 import '../config/client_config.dart';
 import '../mapper/chat_response.dart';
 import '../mapper/chat_stream_response.dart';
+import '../mapper/error_mapper.dart';
 
 class LiteOneApiChat implements OpenAIChat {
   final LiteOneApiClientConfig config;
@@ -84,7 +86,13 @@ class LiteOneApiChat implements OpenAIChat {
 
     final String body = await response.readAsString();
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw StateError('lite_oneapi chat.create failed (${response.statusCode}): $body');
+      throw RequestFailedException(
+        LiteOneApiErrorMapper.extractErrorMessage(
+          body,
+          statusCode: response.statusCode,
+        ),
+        response.statusCode,
+      );
     }
     return LiteOneApiChatResponseMapper.fromJsonString(body);
   }
@@ -142,10 +150,19 @@ class LiteOneApiChat implements OpenAIChat {
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       final String body = await response.readAsString();
-      throw StateError('lite_oneapi chat.createStream failed (${response.statusCode}): $body');
+      throw RequestFailedException(
+        LiteOneApiErrorMapper.extractErrorMessage(
+          body,
+          statusCode: response.statusCode,
+        ),
+        response.statusCode,
+      );
     }
 
-    yield* LiteOneApiChatStreamResponseMapper.fromSseByteStream(response.read());
+    yield* LiteOneApiChatStreamResponseMapper.fromSseByteStream(
+      response.read(),
+      statusCode: response.statusCode,
+    );
   }
 
   @override

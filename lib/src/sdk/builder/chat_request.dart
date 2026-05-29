@@ -4,6 +4,7 @@ import 'package:dart_openai_sdk/dart_openai_sdk.dart'
     show OpenAIChatCompletionChoiceMessageModel, OpenAIToolModel;
 
 import '../config/client_config.dart';
+import 'response_format_mapper.dart';
 
 class LiteOneApiChatRequestBuilder {
   final LiteOneApiClientConfig config;
@@ -70,7 +71,7 @@ class LiteOneApiChatRequestBuilder {
       if (frequencyPenalty != null) "frequency_penalty": frequencyPenalty,
       if (logitBias != null) "logit_bias": logitBias,
       if (user != null) "user": user,
-      if (responseFormat != null) "response_format": responseFormat,
+      if (responseFormat != null) "response_format": LiteOneApiResponseFormatMapper.map(responseFormat),
       if (seed != null) "seed": seed,
       if (logprobs != null) "logprobs": logprobs,
       if (topLogprobs != null) "top_logprobs": topLogprobs,

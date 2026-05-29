@@ -2,12 +2,18 @@
 
 import 'dart:convert';
 
-import 'package:dart_openai_sdk/dart_openai_sdk.dart' show OpenAIStreamChatCompletionModel;
+import 'package:dart_openai_sdk/dart_openai_sdk.dart'
+    show OpenAIStreamChatCompletionModel, RequestFailedException;
+
+import 'error_mapper.dart';
 
 class LiteOneApiChatStreamResponseMapper {
   const LiteOneApiChatStreamResponseMapper._();
 
-  static Stream<OpenAIStreamChatCompletionModel> fromSseByteStream(Stream<List<int>> stream) async* {
+  static Stream<OpenAIStreamChatCompletionModel> fromSseByteStream(
+    Stream<List<int>> stream, {
+    int statusCode = 200,
+  }) async* {
     final StringBuffer buffer = StringBuffer();
 
     await for (final List<int> chunk in stream) {
@@ -24,6 +30,11 @@ class LiteOneApiChatStreamResponseMapper {
           final dynamic decoded = jsonDecode(data);
           if (decoded is! Map<String, dynamic>) {
             throw StateError('lite_oneapi stream returned a non-object chunk.');
+          }
+          try {
+            LiteOneApiErrorMapper.throwIfBusinessErrorMap(decoded, statusCode: statusCode);
+          } on RequestFailedException {
+            rethrow;
           }
           yield OpenAIStreamChatCompletionModel.fromMap(decoded);
         }
@@ -44,6 +55,7 @@ class LiteOneApiChatStreamResponseMapper {
         if (decoded is! Map<String, dynamic>) {
           throw StateError('lite_oneapi stream returned a non-object chunk.');
         }
+        LiteOneApiErrorMapper.throwIfBusinessErrorMap(decoded, statusCode: statusCode);
         yield OpenAIStreamChatCompletionModel.fromMap(decoded);
       }
     }

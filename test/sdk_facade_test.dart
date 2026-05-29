@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:lite_oneapi/lite_oneapi.dart';
+import 'package:ovo/ovo.dart' as ovo;
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 
@@ -140,6 +141,94 @@ void main() {
       expect(result.choices.first.message.reasoningContent, 'hidden chain');
     });
 
+    test('chat.create maps ovo response format to json_schema payload', () async {
+      final fakeGateway = FakeGatewayService()
+        ..nextResponse = Response.ok(
+          jsonEncode({
+            'id': 'chatcmpl-schema',
+            'created': 1710000004,
+            'choices': [
+              {
+                'index': 0,
+                'finish_reason': 'stop',
+                'message': {
+                  'role': 'assistant',
+                  'content': 'schema output',
+                },
+              },
+            ],
+            'usage': {
+              'prompt_tokens': 1,
+              'completion_tokens': 1,
+              'total_tokens': 2,
+            },
+            'system_fingerprint': 'fp_schema',
+          }),
+          headers: {'content-type': 'application/json'},
+        );
+
+      final client = LiteOneApiClient(
+        config: const LiteOneApiClientConfig(apiKey: 'sk-test'),
+        gatewayService: fakeGateway,
+      );
+
+      await client.chat.create(
+        model: 'gpt-4o-mini',
+        messages: [
+          OpenAIChatCompletionChoiceMessageModel(
+            role: OpenAIChatMessageRole.user,
+            content: [
+              OpenAIChatCompletionChoiceMessageContentItemModel.text('hello'),
+            ],
+          ),
+        ],
+        responseFormat: ovo.Object({
+          'status': ovo.String(),
+        }),
+      );
+
+      final Map<String, dynamic> payload = jsonDecode(fakeGateway.lastPayload!) as Map<String, dynamic>;
+      expect(payload['response_format']['type'], 'json_schema');
+      expect(payload['response_format']['json_schema']['schema']['properties']['status']['type'], 'string');
+    });
+
+    test('chat.create throws RequestFailedException for 200 business error body', () async {
+      final fakeGateway = FakeGatewayService()
+        ..nextResponse = Response.ok(
+          jsonEncode({
+            'code': 30015,
+            'message': 'provider business error',
+          }),
+          headers: {'content-type': 'application/json'},
+        );
+
+      final client = LiteOneApiClient(
+        config: const LiteOneApiClientConfig(apiKey: 'sk-test'),
+        gatewayService: fakeGateway,
+      );
+
+      expect(
+        () => client.chat.create(
+          model: 'gpt-4o-mini',
+          messages: [
+            OpenAIChatCompletionChoiceMessageModel(
+              role: OpenAIChatMessageRole.user,
+              content: [
+                OpenAIChatCompletionChoiceMessageContentItemModel.text('hello'),
+              ],
+            ),
+          ],
+        ),
+        throwsA(
+          isA<RequestFailedException>().having(
+            (RequestFailedException e) => e.message,
+            'message',
+            'provider business error',
+          ),
+        ),
+      );
+    });
+
     test('chat.createStream parses SSE chunks and usage chunk', () async {
       final fakeGateway = FakeGatewayService()
         ..nextResponse = Response.ok(
@@ -228,6 +317,43 @@ void main() {
       expect(chunks, hasLength(2));
       expect(chunks[0].choices.first.delta.reasoningContent, 'think-1');
       expect(chunks[1].choices.first.delta.reasoningContent, 'think-2');
+    });
+
+    test('chat.createStream throws RequestFailedException for business error chunk', () async {
+      final fakeGateway = FakeGatewayService()
+        ..nextResponse = Response.ok(
+          Stream<List<int>>.fromIterable([
+            utf8.encode('data: {"code":30015,"message":"stream business error"}\n\n'),
+            utf8.encode('data: [DONE]\n\n'),
+          ]),
+          headers: {'content-type': 'text/event-stream'},
+        );
+
+      final client = LiteOneApiClient(
+        config: const LiteOneApiClientConfig(apiKey: 'sk-test'),
+        gatewayService: fakeGateway,
+      );
+
+      expect(
+        () => client.chat.createStream(
+          model: 'gpt-4o-mini',
+          messages: [
+            OpenAIChatCompletionChoiceMessageModel(
+              role: OpenAIChatMessageRole.user,
+              content: [
+                OpenAIChatCompletionChoiceMessageContentItemModel.text('hello'),
+              ],
+            ),
+          ],
+        ).toList(),
+        throwsA(
+          isA<RequestFailedException>().having(
+            (RequestFailedException e) => e.message,
+            'message',
+            'stream business error',
+          ),
+        ),
+      );
     });
   });
 }
