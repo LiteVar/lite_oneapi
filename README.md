@@ -4,6 +4,21 @@ English · [中文](README-zh_CN.md)
 
 A lite OpenAI HTTP API-compatible transformation tool that allows custom conversion rules for LLM APIs.
 
+## Install
+
+Add `lite_oneapi` from pub.dev:
+
+```bash
+dart pub add lite_oneapi
+```
+
+or:
+
+```yaml
+dependencies:
+  lite_oneapi: ^0.2.0
+```
+
 ## Usage
 
 ### Current Compatibility

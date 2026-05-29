@@ -4,6 +4,21 @@
 
 一个轻量级的OpenAI HTTP API兼容转换工具，可以自定义大模型API的转换规则
 
+## 安装
+
+通过 pub.dev 安装 `lite_oneapi`：
+
+```bash
+dart pub add lite_oneapi
+```
+
+或者在 `pubspec.yaml` 中添加：
+
+```yaml
+dependencies:
+  lite_oneapi: ^0.2.0
+```
+
 ## 使用
 
 ### 当前兼容
