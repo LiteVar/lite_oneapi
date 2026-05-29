@@ -10,13 +10,19 @@
 
 详情可见：`/bin/model_mapping.json`
 
-| 官方大模型                                           | 接口                                   | 兼容情况 |
-|-------------------------------------------------|--------------------------------------|------|
-| OpenAI `gpt-3.5` `gpt-4` `gpt-4o` `gpt-4o-mini` | /v1/chat/completions                 | ✅    |
-| DeepSeek `deepseek-chat` `deepseek-reason`      | /v1/chat/completions                 | ✅    |
-| Qwen `qwq-32b`                                  | /compatible-mode/v1/chat/completions | ✅    |
+| 官方大模型 / 厂商                                                                                                               | 接口                                   | 兼容情况 |
+|----------------------------------------------------------------------------------------------------------------------------|--------------------------------------|------|
+| OpenAI `gpt-3.5` `gpt-4` `gpt-4o` `gpt-4o-mini`                                                                            | /v1/chat/completions                 | ✅    |
+| DeepSeek `deepseek-v4-flash` `deepseek-v4-pro` `deepseek-chat` `deepseek-reasoner`                                        | /v1/chat/completions                 | ✅    |
+| Qwen `qwq-32b` `qwen-plus` `qwen-flash` `qwen3-max` `qwen3.7-max` `qwen3.6-plus` `qwen3.5-plus` `qwen3-coder-plus` 等模型 | /compatible-mode/v1/chat/completions | ✅    |
+| MiniMax `MiniMax-M2.7` `MiniMax-M2.7-highspeed` 及相关 M2.x 模型                                                           | OpenAI-compatible endpoint           | ✅    |
+| GLM `glm-5.1` `glm-5.1-highspeed`                                                                                          | OpenAI-compatible endpoint           | ✅    |
+| Kimi `kimi-k2.5` `kimi-k2.6`                                                                                               | OpenAI-compatible endpoint           | ✅    |
+| MiMo `mimo-v2.5-pro` `mimo-v2.5` `mimo-v2-flash` `mimo-v2-pro` `mimo-v2-omni`                                             | OpenAI-compatible endpoint           | ✅    |
 
-### 使用方法
+### HTTP 网关
+
+#### 使用方法
 
 1. 如果使用`ApiKey`转换，则需要在`/bin/server.dart`同级目录，创建`env.json`，格式如下：
 
@@ -43,6 +49,30 @@
             "type": "bearer",
             "apiKey": "通义千问API的ApiKey，sk- 开头"
           }
+        ],
+        "minimax": [
+          {
+            "type": "bearer",
+            "apiKey": "MiniMax API的ApiKey"
+          }
+        ],
+        "glm": [
+          {
+            "type": "bearer",
+            "apiKey": "GLM API的ApiKey"
+          }
+        ],
+        "kimi": [
+          {
+            "type": "bearer",
+            "apiKey": "Kimi API的ApiKey"
+          }
+        ],
+        "mimo": [
+          {
+            "type": "bearer",
+            "apiKey": "MiMo API的ApiKey"
+          }
         ]
       }
     }
@@ -52,6 +82,103 @@
 
 2. 运行`server.dart`
 3. 客户端使用OpenAI API发起请求
+
+#### 自定义 Base URL 和 Adapter
+
+除了按 `model` 自动路由，也可以在单次请求中显式指定上游地址和协议：
+
+```json
+{
+  "model": "deepseek-v4-pro",
+  "base_url": "https://your-gateway.example.com/v1",
+  "adapter": "openai",
+  "messages": [
+    {"role": "user", "content": "hello"}
+  ]
+}
+```
+
+- `base_url` / `baseUrl`：优先使用你传入的上游地址，而不是 `/bin/model_mapping.json` 中的官方地址
+- `adapter` / `channel`：强制指定 adapter，例如 `openai`、`deepseek`、`qwen`
+- 当传入 `base_url` 且 `model` 不在 `/bin/model_mapping.json` 中时，默认走 `openai` adapter
+- 使用自定义 `base_url` 时，默认保留原始 `Authorization` header
+
+路由优先级：
+- 如果传了 `adapter` / `channel`，优先使用你指定的 adapter
+- 如果没传 `adapter`，但传了 `base_url`：
+  - 当 `model` 能在 `/bin/model_mapping.json` 中命中时，沿用映射里的 adapter
+  - 当 `model` 不在映射中时，回退到 `openai` adapter
+- 如果 `adapter` 和 `base_url` 都没传，则完全按 `/bin/model_mapping.json` 路由
+
+示例：
+- `model=deepseek-v4-pro` + `base_url` + 不传 `adapter`：使用 `deepseek` adapter，但上游地址改成你传入的地址
+- `model=deepseek-v4-pro` + `base_url` + `adapter=openai`：即使模型名是 DeepSeek，也强制走 `openai` adapter
+- `model=some-aggregated-model` + `base_url` + 不传 `adapter`：默认走 `openai` adapter
+
+适用场景：
+- 已经做过接口规整化的聚合厂商
+- 想保留厂商原生 adapter 逻辑的自建代理地址
+
+### Dart SDK Facade
+
+除了 HTTP 用法，`lite_oneapi` 还提供了一层 Dart SDK 风格 facade，直接调用 core service，不需要经过本地 HTTP 中转。
+
+```dart
+import 'package:lite_oneapi/lite_oneapi.dart';
+
+Future<void> main() async {
+  final client = LiteOneApiClient(
+    config: const LiteOneApiClientConfig(
+      apiKey: 'sk-your-api-key',
+      baseUrl: 'https://your-openai-compatible-gateway.example.com/v1',
+      adapter: 'openai',
+    ),
+  );
+
+  final completion = await client.chat.create(
+    model: 'deepseek-v4-pro',
+    messages: [
+      OpenAIChatCompletionChoiceMessageModel(
+        role: OpenAIChatMessageRole.user,
+        content: [
+          OpenAIChatCompletionChoiceMessageContentItemModel.text('Say hello.'),
+        ],
+      ),
+    ],
+  );
+
+  print(completion.choices.first.message.content?.first.text);
+
+  await for (final chunk in client.chat.createStream(
+    model: 'qwen-plus',
+    messages: [
+      OpenAIChatCompletionChoiceMessageModel(
+        role: OpenAIChatMessageRole.user,
+        content: [
+          OpenAIChatCompletionChoiceMessageContentItemModel.text('Count to three.'),
+        ],
+      ),
+    ],
+    streamOptions: const {'include_usage': true},
+  )) {
+    if (chunk.choices.isEmpty) continue;
+    final content = chunk.choices.first.delta.content;
+    if (content != null && content.isNotEmpty) {
+      print(content.first?.text);
+    }
+  }
+}
+```
+
+关键类型：
+- `LiteOneApiClient`
+- `LiteOneApiClientConfig`
+- `client.chat.create(...)`
+- `client.chat.createStream(...)`
+
+参考：
+- 示例：`/example/sdk_facade_example.dart`
+- 测试：`/test/sdk_facade_test.dart`
 
 ### 新增大模型
 

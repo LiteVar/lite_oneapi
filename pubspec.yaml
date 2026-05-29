@@ -1,12 +1,14 @@
 name: lite_oneapi
 description: An API convertor from OpenAI Schema to Other APIs.
-version: 0.1.0
+version: 0.2.0
 repository: https://github.com/LiteVar/lite_oneapi
+publish_to: none
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
+  dart_openai_sdk: ^6.1.3
   shelf: ^1.4.0
   shelf_router: ^1.1.0
   logging: ^1.2.0

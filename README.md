@@ -10,13 +10,19 @@ A lite OpenAI HTTP API-compatible transformation tool that allows custom convers
 
 For details, see: `/bin/model_mapping.json`
 
-| Official Model                                  | Endpoint                             | Compatibility |
-|-------------------------------------------------|--------------------------------------|---------------|
-| OpenAI `gpt-3.5` `gpt-4` `gpt-4o` `gpt-4o-mini` | /v1/chat/completions                 | ✅             |
-| DeepSeek `deepseek-chat` `deepseek-reason`      | /v1/chat/completions                 | ✅             |
-| Qwen `qwq-32b`                                  | /compatible-mode/v1/chat/completions | ✅             |
+| Official Model / Provider                                                                                                      | Endpoint                             | Compatibility |
+|--------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|---------------|
+| OpenAI `gpt-3.5` `gpt-4` `gpt-4o` `gpt-4o-mini`                                                                                | /v1/chat/completions                 | ✅             |
+| DeepSeek `deepseek-v4-flash` `deepseek-v4-pro` `deepseek-chat` `deepseek-reasoner`                                            | /v1/chat/completions                 | ✅             |
+| Qwen `qwq-32b` `qwen-plus` `qwen-flash` `qwen3-max` `qwen3.7-max` `qwen3.6-plus` `qwen3.5-plus` `qwen3-coder-plus` and more | /compatible-mode/v1/chat/completions | ✅             |
+| MiniMax `MiniMax-M2.7` `MiniMax-M2.7-highspeed` and related M2.x models                                                       | OpenAI-compatible endpoint           | ✅             |
+| GLM `glm-5.1` `glm-5.1-highspeed`                                                                                              | OpenAI-compatible endpoint           | ✅             |
+| Kimi `kimi-k2.5` `kimi-k2.6`                                                                                                   | OpenAI-compatible endpoint           | ✅             |
+| MiMo `mimo-v2.5-pro` `mimo-v2.5` `mimo-v2-flash` `mimo-v2-pro` `mimo-v2-omni`                                                 | OpenAI-compatible endpoint           | ✅             |
 
-### How to Use
+### HTTP Gateway
+
+#### How to Use
 
 1. If need `ApiKey` converting, in the same directory as `/bin/server.dart`, create an `env.json` file with the following format:
 
@@ -43,6 +49,30 @@ For details, see: `/bin/model_mapping.json`
             "type": "bearer",
             "apiKey": "Qwen API Key, starting with sk-"
           }
+        ],
+        "minimax": [
+          {
+            "type": "bearer",
+            "apiKey": "MiniMax API key"
+          }
+        ],
+        "glm": [
+          {
+            "type": "bearer",
+            "apiKey": "GLM API key"
+          }
+        ],
+        "kimi": [
+          {
+            "type": "bearer",
+            "apiKey": "Kimi API key"
+          }
+        ],
+        "mimo": [
+          {
+            "type": "bearer",
+            "apiKey": "MiMo API key"
+          }
         ]
       }
     }
@@ -53,6 +83,103 @@ For details, see: `/bin/model_mapping.json`
 
 2. Run `server.dart`
 3. The client sends requests using the OpenAI API.
+
+#### Custom Base URL and Adapter Override
+
+The gateway can route by `model`, or you can override routing per request:
+
+```json
+{
+  "model": "deepseek-v4-pro",
+  "base_url": "https://your-gateway.example.com/v1",
+  "adapter": "openai",
+  "messages": [
+    {"role": "user", "content": "hello"}
+  ]
+}
+```
+
+- `base_url` / `baseUrl`: Use a custom upstream endpoint instead of the mapped official endpoint.
+- `adapter` / `channel`: Force a specific adapter such as `openai`, `deepseek`, or `qwen`.
+- If `base_url` is provided and the model is not found in `/bin/model_mapping.json`, the request defaults to the `openai` adapter.
+- When using a custom `base_url`, the gateway keeps the original `Authorization` header by default.
+
+Routing priority:
+- If `adapter` / `channel` is provided, use that adapter first.
+- If `adapter` is not provided but `base_url` is provided:
+  - use the mapped adapter when `model` exists in `/bin/model_mapping.json`
+  - otherwise fall back to the `openai` adapter
+- If neither `adapter` nor `base_url` is provided, route entirely by `/bin/model_mapping.json`
+
+Examples:
+- `model=deepseek-v4-pro` + `base_url` + no `adapter`: use the `deepseek` adapter with your custom upstream
+- `model=deepseek-v4-pro` + `base_url` + `adapter=openai`: force the `openai` adapter even though the model name is DeepSeek
+- `model=some-aggregated-model` + `base_url` + no `adapter`: default to the `openai` adapter
+
+This is useful for:
+- OpenAI-compatible aggregators that already normalize their APIs.
+- Provider-specific proxies where you still want to force a native adapter.
+
+### Dart SDK Facade
+
+Besides HTTP, `lite_oneapi` also provides a Dart SDK-style facade that calls the core gateway service directly without a local HTTP hop.
+
+```dart
+import 'package:lite_oneapi/lite_oneapi.dart';
+
+Future<void> main() async {
+  final client = LiteOneApiClient(
+    config: const LiteOneApiClientConfig(
+      apiKey: 'sk-your-api-key',
+      baseUrl: 'https://your-openai-compatible-gateway.example.com/v1',
+      adapter: 'openai',
+    ),
+  );
+
+  final completion = await client.chat.create(
+    model: 'deepseek-v4-pro',
+    messages: [
+      OpenAIChatCompletionChoiceMessageModel(
+        role: OpenAIChatMessageRole.user,
+        content: [
+          OpenAIChatCompletionChoiceMessageContentItemModel.text('Say hello.'),
+        ],
+      ),
+    ],
+  );
+
+  print(completion.choices.first.message.content?.first.text);
+
+  await for (final chunk in client.chat.createStream(
+    model: 'qwen-plus',
+    messages: [
+      OpenAIChatCompletionChoiceMessageModel(
+        role: OpenAIChatMessageRole.user,
+        content: [
+          OpenAIChatCompletionChoiceMessageContentItemModel.text('Count to three.'),
+        ],
+      ),
+    ],
+    streamOptions: const {'include_usage': true},
+  )) {
+    if (chunk.choices.isEmpty) continue;
+    final content = chunk.choices.first.delta.content;
+    if (content != null && content.isNotEmpty) {
+      print(content.first?.text);
+    }
+  }
+}
+```
+
+Key types:
+- `LiteOneApiClient`
+- `LiteOneApiClientConfig`
+- `client.chat.create(...)`
+- `client.chat.createStream(...)`
+
+See:
+- Example: `/example/sdk_facade_example.dart`
+- Tests: `/test/sdk_facade_test.dart`
 
 ### Adding a New Model
 
