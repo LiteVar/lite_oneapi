@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import '../../adapters/adapter.dart';
-import '../../adapters/openai/handler.dart';
 import '../../api/meta.dart';
 import '../openai/adapter.dart';
 import 'handler.dart';
@@ -71,4 +70,3 @@ class NewLLMAdapter extends OpenAIAdapter {
     }
   }
 }
-

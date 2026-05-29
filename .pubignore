@@ -1,0 +1,9 @@
+.DS_Store
+.dart_tool/
+.git/
+.idea/
+log/
+pubspec.lock
+lite_oneapi.iml
+bin/env.json
+Dockerfile

@@ -2,7 +2,6 @@ name: lite_oneapi
 description: An API convertor from OpenAI Schema to Other APIs.
 version: 0.2.0
 repository: https://github.com/LiteVar/lite_oneapi
-publish_to: none
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
