@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shelf/shelf.dart';
 
 import '../adapter.dart';
+import '../streaming_response_normalizer.dart';
 
 class MiniMaxResponseHandler implements ResponseHandler {
   @override
@@ -65,7 +66,7 @@ class MiniMaxResponseHandler implements ResponseHandler {
       message.remove('reasoning_details');
     }
 
-    return json;
+    return StreamingResponseNormalizer.normalizeChunk(json);
   }
 
   Stream<List<int>> _transformSse(Stream<List<int>> stream) async* {

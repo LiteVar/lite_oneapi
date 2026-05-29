@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import '../../adapters/adapter.dart';
+import '../../adapters/request_compatibility_patch.dart';
 import '../../adapters/openai/handler.dart';
 import '../../api/meta.dart';
 
@@ -39,8 +40,8 @@ class OpenAIAdapter extends LLMAdapter{
 
   @override
   Future<Map<String, dynamic>> convertRequest(Request request, Meta meta) async {
-    Map<String, dynamic> requestBody = jsonDecode(meta.requestBody);
-    return requestBody;
+    final Map<String, dynamic> requestBody = jsonDecode(meta.requestBody);
+    return RequestCompatibilityPatch.applyReasoningContentReplayPatch(requestBody);
   }
 
   @override
@@ -57,4 +58,3 @@ class OpenAIAdapter extends LLMAdapter{
     }
   }
 }
-

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import '../openai/model/chat_completions_request.dart' as oa;
 import '../exception.dart';
+import '../request_compatibility_patch.dart';
 import 'model/chat_completions_request.dart';
 import '../../define.dart';
 import '../../api/meta.dart';
@@ -29,6 +30,7 @@ class DeepSeekAdapter extends OpenAIAdapter {
   }
 
   Map<String, dynamic> _relayChatCompletions(Map<String, dynamic> data) {
+    RequestCompatibilityPatch.applyReasoningContentReplayPatch(data);
     oa.ChatCompletionRequest oaRequestBody = oa.ChatCompletionRequest.fromJson(data);
     ChatCompletionRequest requestBody = _convertRequest(oaRequestBody);
     return requestBody.toJson();
