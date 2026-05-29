@@ -13,6 +13,7 @@ class Meta {
 
   late String adapterName;
   late String baseUrl;
+  bool useOriginalAuthorization = false;
   late String originalApiKeyWithBearer;
   late IndexApiKey? indexApiKey;
   late RelayMode mode;
@@ -26,6 +27,12 @@ HandleMeta<ModelInfo> initModelInfo = (Meta meta, ModelInfo data) {
   meta.adapterName = data.adapter;
   meta.baseUrl = data.baseUrl;
   logger.log(LogModule.api, "initModelInfo", detail: "adapter: ${data.adapter}, baseUrl: ${data.baseUrl}", level: Level.FINEST);
+  return meta;
+};
+
+HandleMeta<bool> initUseOriginalAuthorization = (Meta meta, bool data) {
+  meta.useOriginalAuthorization = data;
+  logger.log(LogModule.api, "initUseOriginalAuthorization", detail: "useOriginalAuthorization: $data", level: Level.FINEST);
   return meta;
 };
 

@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'adapters/adapter.dart';
 import 'adapters/deepseek/adapter.dart';
+import 'adapters/glm/adapter.dart';
+import 'adapters/kimi/adapter.dart';
+import 'adapters/mimo/adapter.dart';
+import 'adapters/minimax/adapter.dart';
 import 'adapters/openai/adapter.dart';
 import 'adapters/qwen/adapter.dart';
 import 'model.dart';
@@ -11,6 +15,10 @@ import 'utils/pool.dart';
 Map<String, LLMAdapter> channelAdapterMapper = {
   "openai": OpenAIAdapter(),
   "deepseek": DeepSeekAdapter(),
+  "glm": GLMAdapter(),
+  "kimi": KimiAdapter(),
+  "mimo": MimoAdapter(),
+  "minimax": MiniMaxAdapter(),
   "qwen": QwenAdapter(),
   /// Add other adapters
 };

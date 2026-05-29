@@ -55,7 +55,7 @@ abstract class LLMAdapter {
 
     String? authorizationKey = null;
 
-    if((config.mode != null && config.mode!.transparent == true) || env == null) {
+    if(meta.useOriginalAuthorization || (config.mode != null && config.mode!.transparent == true) || env == null) {
       newHeaders["Authorization"] = meta.originalApiKeyWithBearer;
     } else {
       switch(meta.indexApiKey!.type) {
@@ -72,7 +72,7 @@ abstract class LLMAdapter {
   }
 
   void _releaseApiKey(Meta meta) {
-    if((config.mode != null && config.mode!.transparent == true) || env == null) {
+    if(meta.useOriginalAuthorization || (config.mode != null && config.mode!.transparent == true) || env == null) {
       return ;
     }
     adapterKeyPools![meta.adapterName]?.release(meta.indexApiKey!.id);
@@ -83,4 +83,3 @@ abstract class ResponseHandler {
   Response handle(Response response);
   Response handleStream(Response response);
 }
-

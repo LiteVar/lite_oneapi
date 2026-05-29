@@ -1,12 +1,23 @@
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import '../openai/model/chat_completions_request.dart' as oa;
+import '../exception.dart';
 import 'model/chat_completions_request.dart';
 import '../../define.dart';
 import '../../api/meta.dart';
 import '../openai/adapter.dart';
 
 class DeepSeekAdapter extends OpenAIAdapter {
+  @override
+  void init(Meta meta) {
+    if(meta.mode != RelayMode.ChatCompletions) return;
+
+    oa.ChatCompletionRequest requestBody = oa.ChatCompletionRequest.fromJson(jsonDecode(meta.requestBody));
+    if(_usesBetaFeatures(requestBody) && !meta.baseUrl.endsWith("/beta")) {
+      meta.baseUrl = "${meta.baseUrl}/beta";
+    }
+  }
+
   @override
   Future<Map<String, dynamic>> convertRequest(Request request, Meta meta) async {
     Map<String, dynamic> data = jsonDecode(meta.requestBody);
@@ -30,6 +41,8 @@ class DeepSeekAdapter extends OpenAIAdapter {
       frequency_penalty: oaRequest.frequency_penalty,
       max_tokens: oaRequest.max_tokens??oaRequest.max_completion_tokens,
       presence_penalty: oaRequest.presence_penalty,
+      thinking: _convertThinking(oaRequest.thinking),
+      reasoning_effort: oaRequest.reasoning_effort,
       response_format: _convertResponseFormat(oaRequest.response_format),
       stop: oaRequest.stop,
       stream: oaRequest.stream,
@@ -53,8 +66,8 @@ class DeepSeekAdapter extends OpenAIAdapter {
       role: oaRole,
       content: _convertContent(oaMessage.content),
       name: oaMessage.name,
-      prefix: null,  /// for assistant
-      reasoning_content: null, /// for assistant
+      prefix: oaMessage.prefix,
+      reasoning_content: oaMessage.reasoning_content,
       tool_calls: oaMessage.tool_calls?.map((oaToolCall) => _convertToolCall(oaToolCall)).toList(), /// for assistant
       tool_call_id: oaMessage.tool_call_id /// for tool
     );
@@ -105,6 +118,13 @@ class DeepSeekAdapter extends OpenAIAdapter {
     );
   }
 
+  Thinking? _convertThinking(oa.Thinking? oaThinking) {
+    if(oaThinking == null) return null;
+    return Thinking(
+      type: oaThinking.type,
+    );
+  }
+
   dynamic _convertToolChoice(dynamic tool_choice) {
     if(tool_choice is String) {
       return tool_choice;
@@ -113,18 +133,36 @@ class DeepSeekAdapter extends OpenAIAdapter {
     }
   }
 
+  bool _usesBetaFeatures(oa.ChatCompletionRequest requestBody) {
+    return requestBody.messages.any((message) {
+      return message.prefix == true || message.reasoning_content != null;
+    });
+  }
+
   String _convertContent(dynamic content) {
     if(content is String) {
       return content;
     } else if(content is List<dynamic>) {
       return _convertContentList(content);
     } else {
-      return "";
+      throw UnsupportedRequestException("DeepSeek chat completions only supports text content messages.");
     }
   }
 
   String _convertContentList(List<dynamic> oaContentList) {
-    oa.Content oaFirstContent = oa.Content.fromJson(oaContentList.first);
-    return oaFirstContent.text!;
+    List<String> textParts = [];
+
+    for(final dynamic item in oaContentList) {
+      oa.Content contentItem = oa.Content.fromJson(item as Map<String, dynamic>);
+      if(contentItem.type == "text" && contentItem.text != null) {
+        textParts.add(contentItem.text!);
+        continue;
+      }
+      throw UnsupportedRequestException(
+        "DeepSeek chat completions currently only supports text content parts, but received `${contentItem.type}`.",
+      );
+    }
+
+    return textParts.join("\n");
   }
 }

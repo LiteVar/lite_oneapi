@@ -22,6 +22,7 @@ class ChatCompletionRequest {
   bool? parallel_tool_calls;
   Prediction? prediction;
   int? presence_penalty;
+  Thinking? thinking;
   String? reasoning_effort; /// `low`, `medium`, `high`
   ResponseFormat? response_format;
   int? seed;
@@ -54,6 +55,7 @@ class ChatCompletionRequest {
     this.parallel_tool_calls,
     this.prediction,
     this.presence_penalty,
+    this.thinking,
     this.reasoning_effort,
     this.response_format,
     this.seed,
@@ -92,11 +94,13 @@ class Message {
   dynamic content; /// String or List<Content>
   String? name;
   @Deprecated('Deprecated and replaced by tool_calls.') FunctionCalledModel? function_call; /// for assistant
+  bool? prefix; /// DeepSeek beta extension
+  String? reasoning_content; /// DeepSeek beta extension
   String? refusal;  /// for assistant
   List<ToolCall>? tool_calls; /// for assistant
   String? tool_call_id; /// for tool
 
-  Message({required this.role, required this.content, this.name, this.function_call, this.refusal, this.tool_calls, this.tool_call_id});
+  Message({required this.role, required this.content, this.name, this.function_call, this.prefix, this.reasoning_content, this.refusal, this.tool_calls, this.tool_call_id});
 
   factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(json);
 
@@ -187,6 +191,17 @@ class Prediction {
   factory Prediction.fromJson(Map<String, dynamic> json) => _$PredictionFromJson(json);
 
   Map<String, dynamic> toJson() => _$PredictionToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
+class Thinking {
+  String type; /// `enabled`, `disabled`
+
+  Thinking({required this.type});
+
+  factory Thinking.fromJson(Map<String, dynamic> json) => _$ThinkingFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ThinkingToJson(this);
 }
 
 

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import '../openai/model/chat_completions_request.dart' as oa;
+import '../exception.dart';
 import 'model/chat_completions_request.dart';
 import '../../api/meta.dart';
 import '../../define.dart';
@@ -17,7 +18,6 @@ class QwenAdapter extends OpenAIAdapter {
 
   @override
   Future<Map<String, dynamic>> convertRequest(Request request, Meta meta) async {
-    /// TODO: add request body convert here for your need
     Map<String, dynamic> data = jsonDecode(meta.requestBody);
 
     if(meta.mode == RelayMode.ChatCompletions) {
@@ -28,42 +28,53 @@ class QwenAdapter extends OpenAIAdapter {
 
   Map<String, dynamic> _relayChatCompletions(Map<String, dynamic> data) {
     oa.ChatCompletionRequest oaRequestBody = oa.ChatCompletionRequest.fromJson(data);
-    ChatCompletionRequest requestBody = _convertRequest(oaRequestBody);
-    return requestBody.toJson();
-  }
+    _validateRequest(oaRequestBody);
 
-  ChatCompletionRequest _convertRequest(oa.ChatCompletionRequest oaRequest) {
-    return ChatCompletionRequest(
-      model: oaRequest.model,
-      messages: oaRequest.messages.map((oaMessage)=>_convertMessage(oaMessage)).toList(),
-      stream: oaRequest.stream,
-      stream_options: _convertStreamOptions(oaRequest.stream_options),
-      modalities: oaRequest.modalities,
-      temperature: oaRequest.temperature,
-      top_p: oaRequest.top_p,
-      presence_penalty: oaRequest.presence_penalty,
-      response_format: _convertResponseFormat(oaRequest.response_format),
-      max_tokens: oaRequest.max_tokens??oaRequest.max_completion_tokens,
-      n: oaRequest.n,
-      seed: oaRequest.seed,
-      stop: oaRequest.stop,
-      tools: oaRequest.tools?.map((oaTool)=>_convertTool(oaTool)).toList(),
-      tool_choice: _convertToolChoice(oaRequest.tool_choice),
-      parallel_tool_calls: oaRequest.parallel_tool_calls,
-      translation_options: null,
-      enable_search: oaRequest.web_search_options == null? null: true,
-      x_dashScope_dataInspection: null,
-    );
+    Map<String, dynamic> requestBody = Map<String, dynamic>.from(data);
+    requestBody["messages"] = oaRequestBody.messages.map((oaMessage)=>_convertMessage(oaMessage)).toList();
+
+    if(requestBody["max_tokens"] == null && oaRequestBody.max_completion_tokens != null) {
+      requestBody["max_tokens"] = oaRequestBody.max_completion_tokens;
+    }
+
+    if(requestBody["enable_search"] == null && oaRequestBody.web_search_options != null) {
+      requestBody["enable_search"] = true;
+    }
+
+    if(requestBody["tools"] == null && oaRequestBody.functions != null) {
+      requestBody["tools"] = oaRequestBody.functions!.map((oaFunction)=>_convertFunctionToTool(oaFunction).toJson()).toList();
+    }
+
+    if(requestBody["tool_choice"] == null && oaRequestBody.function_call != null) {
+      requestBody["tool_choice"] = _convertDeprecatedFunctionCall(oaRequestBody.function_call);
+    }
+
+    requestBody.remove("functions");
+    requestBody.remove("function_call");
+    requestBody.remove("max_completion_tokens");
+    requestBody.remove("web_search_options");
+
+    return requestBody;
   }
   
-  Message _convertMessage(oa.Message oaMessage) {
-    return Message(
-      role: oaMessage.role,
-      content: oaMessage.content,
-      partial: null,
-      tool_calls: oaMessage.tool_calls?.map((oaToolCall)=>_convertToolCall(oaToolCall)).toList(),
-      tool_call_id: oaMessage.tool_call_id,
-    );
+  void _validateRequest(oa.ChatCompletionRequest oaRequest) {
+    if(oaRequest.response_format?.type == "json_schema") {
+      throw UnsupportedRequestException(
+        "Qwen compatible-mode chat completions does not support `response_format.type = json_schema`.",
+      );
+    }
+  }
+
+  Map<String, dynamic> _convertMessage(oa.Message oaMessage) {
+    return {
+      "role": oaMessage.role,
+      if(oaMessage.content != null) "content": oaMessage.content,
+      if(oaMessage.name != null) "name": oaMessage.name,
+      if(oaMessage.tool_calls != null)
+        "tool_calls": oaMessage.tool_calls!.map((oaToolCall)=>_convertToolCall(oaToolCall).toJson()).toList(),
+      if(oaMessage.tool_call_id != null) "tool_call_id": oaMessage.tool_call_id,
+      if(oaMessage.refusal != null) "refusal": oaMessage.refusal,
+    };
   }
 
   ToolCall _convertToolCall(oa.ToolCall oaToolCall) {
@@ -81,24 +92,10 @@ class QwenAdapter extends OpenAIAdapter {
     );
   }
 
-  ResponseFormat? _convertResponseFormat(oa.ResponseFormat? oaResponseFormat) {
-    if(oaResponseFormat == null) return null;
-    return ResponseFormat(
-      type: oaResponseFormat.type,
-    );
-  }
-
-  StreamOptions? _convertStreamOptions(oa.StreamOptions? oaStreamOptions) {
-    if(oaStreamOptions == null) return null;
-    return StreamOptions(
-        include_usage: oaStreamOptions.include_usage
-    );
-  }
-
-  Tool _convertTool(oa.Tool oaTool) {
+  Tool _convertFunctionToTool(oa.FunctionModel oaFunctionModel) {
     return Tool(
-        type: oaTool.type,
-        function: _convertFunctionModel(oaTool.function)
+      type: "function",
+      function: _convertFunctionModel(oaFunctionModel),
     );
   }
 
@@ -110,13 +107,18 @@ class QwenAdapter extends OpenAIAdapter {
     );
   }
 
-  dynamic _convertToolChoice(dynamic tool_choice) {
-    if(tool_choice is String) {
-      return tool_choice;
-    } else if(tool_choice is oa.Tool) {
-      return _convertTool(tool_choice);
+  dynamic _convertDeprecatedFunctionCall(dynamic functionCall) {
+    if(functionCall is String) {
+      return functionCall;
+    } else if(functionCall is oa.FunctionCall) {
+      return {
+        "type": "function",
+        "function": {
+          "name": functionCall.name,
+        }
+      };
     }
+    return functionCall;
   }
 
 }
-

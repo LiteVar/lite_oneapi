@@ -11,6 +11,8 @@ class ChatCompletionRequest {
   int? frequency_penalty;
   int? max_tokens;
   int? presence_penalty;
+  Thinking? thinking;
+  String? reasoning_effort;
   ResponseFormat? response_format;
   dynamic stop; /// String or List<String> or null
   bool? stream;
@@ -28,6 +30,8 @@ class ChatCompletionRequest {
     this.frequency_penalty,
     this.max_tokens,
     this.presence_penalty,
+    this.thinking,
+    this.reasoning_effort,
     this.response_format,
     this.stop,
     this.stream,
@@ -105,6 +109,17 @@ class FunctionModel {
   factory FunctionModel.fromJson(Map<String, dynamic> json) => _$FunctionModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$FunctionModelToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
+class Thinking {
+  String type; /// `enabled`, `disabled`
+
+  Thinking({required this.type});
+
+  factory Thinking.fromJson(Map<String, dynamic> json) => _$ThinkingFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ThinkingToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true, includeIfNull: false)

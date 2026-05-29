@@ -20,6 +20,30 @@
         "type": "bearer",
         "apiKey": "sk-ccc"
       }
+    ],
+    "minimax": [
+      {
+        "type": "bearer",
+        "apiKey": "sk-ddd"
+      }
+    ],
+    "glm": [
+      {
+        "type": "bearer",
+        "apiKey": "sk-eee"
+      }
+    ],
+    "kimi": [
+      {
+        "type": "bearer",
+        "apiKey": "sk-fff"
+      }
+    ],
+    "mimo": [
+      {
+        "type": "bearer",
+        "apiKey": "sk-ggg"
+      }
     ]
   }
 }

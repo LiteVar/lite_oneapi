@@ -13,3 +13,13 @@ class AdapterNotFoundException implements Exception {
 
   Map<String, dynamic> toJson() => _$AdapterNotFoundExceptionToJson(this);
 }
+
+@JsonSerializable(createFactory: false)
+class UnsupportedRequestException implements Exception {
+  int code = 400;
+  late String message;
+
+  UnsupportedRequestException(this.message);
+
+  Map<String, dynamic> toJson() => _$UnsupportedRequestExceptionToJson(this);
+}
