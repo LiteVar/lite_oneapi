@@ -1,3 +1,7 @@
+## 0.2.1
+
+- fixed adapter url endpoint issue
+
 ## 0.2.0
 
 - Add provider adapters for DeepSeek, Qwen, MiniMax, GLM, Kimi, and MiMo.
