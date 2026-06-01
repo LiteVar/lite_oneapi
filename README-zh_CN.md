@@ -115,8 +115,15 @@ dependencies:
 
 - `base_url` / `baseUrl`：优先使用你传入的上游地址，而不是 `/bin/model_mapping.json` 中的官方地址
 - `adapter` / `channel`：强制指定 adapter，例如 `openai`、`deepseek`、`qwen`
+- `endpoint` / `url_path` / `urlPath`：可选，显式指定转发到上游的路径
 - 当传入 `base_url` 且 `model` 不在 `/bin/model_mapping.json` 中时，默认走 `openai` adapter
 - 使用自定义 `base_url` 时，默认保留原始 `Authorization` header
+- 使用自定义 `base_url` 时，默认保留原始 OpenAI 路径；如果需要厂商路径，可以用 `endpoint` 显式覆盖
+- 如果 `base_url` 已经包含路径前缀，系统会自动补齐默认 endpoint：
+  - `https://example.com/prefix` -> `https://example.com/prefix/v1/chat/completions`
+  - `https://example.com/prefix/v1` -> `https://example.com/prefix/v1/chat/completions`
+  - `https://example.com/prefix/v4` -> `https://example.com/prefix/v4/chat/completions`
+  - `https://example.com/prefix/v1/chat/completions` -> 不再重复追加
 
 路由优先级：
 - 如果传了 `adapter` / `channel`，优先使用你指定的 adapter
@@ -128,6 +135,8 @@ dependencies:
 示例：
 - `model=deepseek-v4-pro` + `base_url` + 不传 `adapter`：使用 `deepseek` adapter，但上游地址改成你传入的地址
 - `model=deepseek-v4-pro` + `base_url` + `adapter=openai`：即使模型名是 DeepSeek，也强制走 `openai` adapter
+- `model=qwen-plus` + `base_url` + `adapter=qwen`：使用 `qwen` adapter，但默认请求你的上游 `/v1/chat/completions`
+- `model=qwen-plus` + `base_url` + `adapter=qwen` + `endpoint=/compatible-mode/v1/chat/completions`：使用 `qwen` adapter，并显式请求通义兼容模式路径
 - `model=some-aggregated-model` + `base_url` + 不传 `adapter`：默认走 `openai` adapter
 
 适用场景：

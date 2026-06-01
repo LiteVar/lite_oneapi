@@ -6,17 +6,18 @@ class GLMAdapter extends OpenAIAdapter {
   @override
   String getRequestURL(Request request, Meta meta) {
     String urlPath = "/${request.url.path}";
-    if(urlPath.startsWith("/v1/")) {
+    if (!meta.isCustomBaseUrl && urlPath.startsWith("/v1/")) {
       urlPath = urlPath.substring(3);
     }
-    return "${meta.baseUrl}$urlPath";
+    return buildRequestUrl(meta, urlPath);
   }
 
   @override
   Map<String, String> setupRequestHeaders(Request request, Meta meta) {
     Map<String, String> headers = {};
     headers.addAll(request.headers);
-    headers["Accept"] = meta.isStream ? "text/event-stream" : "application/json";
+    headers["Accept"] =
+        meta.isStream ? "text/event-stream" : "application/json";
     return headers;
   }
 }

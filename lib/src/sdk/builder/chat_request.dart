@@ -59,8 +59,10 @@ class LiteOneApiChatRequestBuilder {
     return {
       "model": model,
       if (stream) "stream": true,
-      "messages": messages.map((message) => message.toMap()).toList(growable: false),
-      if (tools != null) "tools": tools!.map((tool) => tool.toMap()).toList(growable: false),
+      "messages":
+          messages.map((message) => message.toMap()).toList(growable: false),
+      if (tools != null)
+        "tools": tools!.map((tool) => tool.toMap()).toList(growable: false),
       if (toolChoice != null) "tool_choice": toolChoice,
       if (temperature != null) "temperature": temperature,
       if (topP != null) "top_p": topP,
@@ -71,15 +73,21 @@ class LiteOneApiChatRequestBuilder {
       if (frequencyPenalty != null) "frequency_penalty": frequencyPenalty,
       if (logitBias != null) "logit_bias": logitBias,
       if (user != null) "user": user,
-      if (responseFormat != null) "response_format": LiteOneApiResponseFormatMapper.map(responseFormat),
+      if (responseFormat != null)
+        "response_format": LiteOneApiResponseFormatMapper.map(responseFormat),
       if (seed != null) "seed": seed,
       if (logprobs != null) "logprobs": logprobs,
       if (topLogprobs != null) "top_logprobs": topLogprobs,
-      if (streamOptions != null && streamOptions!.isNotEmpty) "stream_options": streamOptions,
+      if (streamOptions != null && streamOptions!.isNotEmpty)
+        "stream_options": streamOptions,
       if (reasoningEffort != null) "reasoning_effort": reasoningEffort,
       if (enableThinking != null) "enable_thinking": enableThinking,
-      if (config.baseUrl != null && config.baseUrl!.isNotEmpty) "base_url": config.baseUrl,
-      if (config.adapter != null && config.adapter!.isNotEmpty) "adapter": config.adapter,
+      if (config.baseUrl != null && config.baseUrl!.isNotEmpty)
+        "base_url": config.baseUrl,
+      if (config.adapter != null && config.adapter!.isNotEmpty)
+        "adapter": config.adapter,
+      if (config.endpoint != null && config.endpoint!.isNotEmpty)
+        "endpoint": config.endpoint,
     };
   }
 }

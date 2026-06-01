@@ -116,8 +116,15 @@ The gateway can route by `model`, or you can override routing per request:
 
 - `base_url` / `baseUrl`: Use a custom upstream endpoint instead of the mapped official endpoint.
 - `adapter` / `channel`: Force a specific adapter such as `openai`, `deepseek`, or `qwen`.
+- `endpoint` / `url_path` / `urlPath`: Optional upstream path override.
 - If `base_url` is provided and the model is not found in `/bin/model_mapping.json`, the request defaults to the `openai` adapter.
 - When using a custom `base_url`, the gateway keeps the original `Authorization` header by default.
+- When using a custom `base_url`, the gateway keeps the original OpenAI path by default; use `endpoint` when you need a provider-specific path.
+- If `base_url` already contains a path prefix, the gateway completes the default endpoint automatically:
+  - `https://example.com/prefix` -> `https://example.com/prefix/v1/chat/completions`
+  - `https://example.com/prefix/v1` -> `https://example.com/prefix/v1/chat/completions`
+  - `https://example.com/prefix/v4` -> `https://example.com/prefix/v4/chat/completions`
+  - `https://example.com/prefix/v1/chat/completions` -> no extra suffix is appended
 
 Routing priority:
 - If `adapter` / `channel` is provided, use that adapter first.
@@ -129,6 +136,8 @@ Routing priority:
 Examples:
 - `model=deepseek-v4-pro` + `base_url` + no `adapter`: use the `deepseek` adapter with your custom upstream
 - `model=deepseek-v4-pro` + `base_url` + `adapter=openai`: force the `openai` adapter even though the model name is DeepSeek
+- `model=qwen-plus` + `base_url` + `adapter=qwen`: use the `qwen` adapter while calling your upstream `/v1/chat/completions`
+- `model=qwen-plus` + `base_url` + `adapter=qwen` + `endpoint=/compatible-mode/v1/chat/completions`: use the `qwen` adapter and explicitly call the Qwen compatible-mode path
 - `model=some-aggregated-model` + `base_url` + no `adapter`: default to the `openai` adapter
 
 This is useful for:

@@ -5,8 +5,7 @@ import '../../adapters/request_compatibility_patch.dart';
 import '../../adapters/openai/handler.dart';
 import '../../api/meta.dart';
 
-class OpenAIAdapter extends LLMAdapter{
-
+class OpenAIAdapter extends LLMAdapter {
   @override
   ResponseHandler get responseHandler => OpenAIResponseHandler();
 
@@ -21,27 +20,113 @@ class OpenAIAdapter extends LLMAdapter{
   @override
   String getRequestURL(Request request, Meta meta) {
     String urlPath = "/${request.url.path}";
-    return "${meta.baseUrl}$urlPath";
+    return buildRequestUrl(meta, urlPath);
+  }
+
+  String buildRequestUrl(Meta meta, String defaultPath) {
+    final String baseUrl = meta.baseUrl.endsWith("/")
+        ? meta.baseUrl.substring(0, meta.baseUrl.length - 1)
+        : meta.baseUrl;
+
+    if (meta.endpoint != null) {
+      return _joinUrl(baseUrl, _pathSegments(meta.endpoint!));
+    }
+
+    final List<String> baseSegments = _basePathSegments(baseUrl);
+    final List<String> defaultSegments = _pathSegments(defaultPath);
+    final List<String> defaultTailSegments =
+        _dropLeadingVersion(defaultSegments);
+
+    if (_endsWithEquivalentSegments(baseSegments, defaultSegments)) {
+      return baseUrl;
+    }
+
+    if (baseSegments.isNotEmpty &&
+        _isVersionSegment(baseSegments.last) &&
+        defaultTailSegments.isNotEmpty) {
+      return _joinUrl(baseUrl, defaultTailSegments);
+    }
+
+    return _joinUrl(baseUrl, defaultSegments);
+  }
+
+  List<String> _basePathSegments(String baseUrl) {
+    final Uri? uri = Uri.tryParse(baseUrl);
+    if (uri == null || uri.path.isEmpty) {
+      return const [];
+    }
+    return uri.pathSegments.where((segment) => segment.isNotEmpty).toList();
+  }
+
+  List<String> _pathSegments(String path) {
+    return path
+        .split("/")
+        .where((segment) => segment.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  List<String> _dropLeadingVersion(List<String> segments) {
+    if (segments.isNotEmpty && _isVersionSegment(segments.first)) {
+      return segments.skip(1).toList(growable: false);
+    }
+    return segments;
+  }
+
+  bool _endsWithEquivalentSegments(
+      List<String> baseSegments, List<String> defaultSegments) {
+    if (baseSegments.length < defaultSegments.length) {
+      return false;
+    }
+
+    final int offset = baseSegments.length - defaultSegments.length;
+    for (int index = 0; index < defaultSegments.length; index++) {
+      final String baseSegment = baseSegments[offset + index];
+      final String defaultSegment = defaultSegments[index];
+      if (baseSegment == defaultSegment) {
+        continue;
+      }
+      if (_isVersionSegment(baseSegment) && _isVersionSegment(defaultSegment)) {
+        continue;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  bool _isVersionSegment(String segment) {
+    return RegExp(r"^v\d+$").hasMatch(segment);
+  }
+
+  String _joinUrl(String baseUrl, List<String> pathSegments) {
+    if (pathSegments.isEmpty) {
+      return baseUrl;
+    }
+    return "$baseUrl/${pathSegments.join("/")}";
   }
 
   @override
   Map<String, String> setupRequestHeaders(Request request, Meta meta) {
     Map<String, String> headers = {};
     headers.addAll(request.headers);
-    if(meta.isStream) {
-      if(headers["Accept"] != "text/event-stream")  headers["Accept"] = "text/event-stream";
-      if(headers["X-DashScope-SSE"] != "enable" ) headers["X-DashScope-SSE"] = "enable";
+    if (meta.isStream) {
+      if (headers["Accept"] != "text/event-stream")
+        headers["Accept"] = "text/event-stream";
+      if (headers["X-DashScope-SSE"] != "enable")
+        headers["X-DashScope-SSE"] = "enable";
     } else {
-      if(headers["Accept"] != "application/json")  headers["Accept"] = "application/json";
+      if (headers["Accept"] != "application/json")
+        headers["Accept"] = "application/json";
     }
 
     return headers;
   }
 
   @override
-  Future<Map<String, dynamic>> convertRequest(Request request, Meta meta) async {
+  Future<Map<String, dynamic>> convertRequest(
+      Request request, Meta meta) async {
     final Map<String, dynamic> requestBody = jsonDecode(meta.requestBody);
-    return RequestCompatibilityPatch.applyReasoningContentReplayPatch(requestBody);
+    return RequestCompatibilityPatch.applyReasoningContentReplayPatch(
+        requestBody);
   }
 
   @override
@@ -51,7 +136,7 @@ class OpenAIAdapter extends LLMAdapter{
 
   @override
   Future<Response> doResponse(Response response, Meta meta) async {
-    if(meta.isStream) {
+    if (meta.isStream) {
       return responseHandler.handleStream(response);
     } else {
       return responseHandler.handle(response);
