@@ -1,3 +1,7 @@
+## 0.2.2
+
+- fix logging performance issue on windows
+
 ## 0.2.1
 
 - fixed adapter url endpoint issue
