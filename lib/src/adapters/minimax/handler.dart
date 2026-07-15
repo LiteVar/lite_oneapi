@@ -8,12 +8,14 @@ import '../streaming_response_normalizer.dart';
 class MiniMaxResponseHandler implements ResponseHandler {
   @override
   Response handle(Response response) {
-    final Future<List<int>> rewrittenBody = response.readAsString().then((String body) {
+    final Future<List<int>> rewrittenBody =
+        response.readAsString().then((String body) {
       final dynamic decoded = jsonDecode(body);
       if (decoded is! Map<String, dynamic>) {
         return utf8.encode(body);
       }
-      final Map<String, dynamic> rewritten = _rewriteCompletionResponse(decoded);
+      final Map<String, dynamic> rewritten =
+          _rewriteCompletionResponse(decoded);
       return utf8.encode(jsonEncode(rewritten));
     });
 
@@ -57,7 +59,8 @@ class MiniMaxResponseHandler implements ResponseHandler {
       if (projection.content != null) {
         message['content'] = projection.content;
       }
-      if (projection.reasoningContent != null && projection.reasoningContent!.isNotEmpty) {
+      if (projection.reasoningContent != null &&
+          projection.reasoningContent!.isNotEmpty) {
         message['reasoning_content'] = _mergeText(
           message['reasoning_content'] as String?,
           projection.reasoningContent!,
@@ -71,10 +74,11 @@ class MiniMaxResponseHandler implements ResponseHandler {
 
   Stream<List<int>> _transformSse(Stream<List<int>> stream) async* {
     final StringBuffer buffer = StringBuffer();
-    final Map<String, _MiniMaxStreamState> stateByChoice = <String, _MiniMaxStreamState>{};
+    final Map<String, _MiniMaxStreamState> stateByChoice =
+        <String, _MiniMaxStreamState>{};
 
-    await for (final List<int> chunk in stream) {
-      buffer.write(utf8.decode(chunk));
+    await for (final String chunk in utf8.decoder.bind(stream)) {
+      buffer.write(chunk);
       String current = buffer.toString();
       int delimiterIndex = current.indexOf('\n\n');
 
@@ -88,7 +92,8 @@ class MiniMaxResponseHandler implements ResponseHandler {
         } else {
           final dynamic decoded = jsonDecode(data);
           if (decoded is Map<String, dynamic>) {
-            final Map<String, dynamic> rewritten = _rewriteStreamChunk(decoded, stateByChoice);
+            final Map<String, dynamic> rewritten =
+                _rewriteStreamChunk(decoded, stateByChoice);
             yield utf8.encode('data: ${jsonEncode(rewritten)}\n\n');
           } else {
             yield utf8.encode('$frame\n\n');
@@ -111,7 +116,8 @@ class MiniMaxResponseHandler implements ResponseHandler {
       } else {
         final dynamic decoded = jsonDecode(data);
         if (decoded is Map<String, dynamic>) {
-          final Map<String, dynamic> rewritten = _rewriteStreamChunk(decoded, stateByChoice);
+          final Map<String, dynamic> rewritten =
+              _rewriteStreamChunk(decoded, stateByChoice);
           yield utf8.encode('data: ${jsonEncode(rewritten)}\n\n');
         } else {
           yield utf8.encode('$remaining\n\n');
@@ -178,7 +184,8 @@ class MiniMaxResponseHandler implements ResponseHandler {
   }
 
   _ReasoningProjection _projectNonStreamMessage(Map<String, dynamic> message) {
-    final String? reasoningDetails = _flattenReasoningDetails(message['reasoning_details']);
+    final String? reasoningDetails =
+        _flattenReasoningDetails(message['reasoning_details']);
     final dynamic rawContent = message['content'];
     final String? content = rawContent is String ? rawContent : null;
 
@@ -205,7 +212,8 @@ class MiniMaxResponseHandler implements ResponseHandler {
   }
 
   _ReasoningProjection _projectStreamDelta(Map<String, dynamic> delta) {
-    final String? reasoningDetails = _flattenReasoningDetails(delta['reasoning_details']);
+    final String? reasoningDetails =
+        _flattenReasoningDetails(delta['reasoning_details']);
     final dynamic rawContent = delta['content'];
     final String? content = rawContent is String ? rawContent : null;
 
@@ -280,7 +288,8 @@ class MiniMaxResponseHandler implements ResponseHandler {
 
   String _trimTrailingPartialTag(String value, String tag) {
     for (int i = tag.length - 1; i > 0; i--) {
-      final String suffix = value.length >= i ? value.substring(value.length - i) : value;
+      final String suffix =
+          value.length >= i ? value.substring(value.length - i) : value;
       if (tag.startsWith(suffix)) {
         return value.substring(0, value.length - suffix.length);
       }

@@ -21,7 +21,8 @@ class FakeGatewayService extends LiteOneApiGatewayService {
     lastPayload = payload;
     lastPath = requestPath;
     lastHeaders = requestHeaders;
-    return nextResponse ?? Response.internalServerError(body: 'missing fake response');
+    return nextResponse ??
+        Response.internalServerError(body: 'missing fake response');
   }
 }
 
@@ -82,7 +83,8 @@ void main() {
       expect(fakeGateway.lastPath, '/v1/chat/completions');
       expect(fakeGateway.lastHeaders?['Authorization'], 'Bearer sk-test');
 
-      final payload = jsonDecode(fakeGateway.lastPayload!) as Map<String, dynamic>;
+      final payload =
+          jsonDecode(fakeGateway.lastPayload!) as Map<String, dynamic>;
       expect(payload['model'], 'deepseek-v4-pro');
       expect(payload['base_url'], 'https://proxy.example.com/v1');
       expect(payload['adapter'], 'openai');
@@ -91,7 +93,8 @@ void main() {
       expect(payload['messages'][0]['content'][0]['text'], 'hello');
     });
 
-    test('chat.create preserves reasoning_content in request and response', () async {
+    test('chat.create preserves reasoning_content in request and response',
+        () async {
       final fakeGateway = FakeGatewayService()
         ..nextResponse = Response.ok(
           jsonEncode({
@@ -129,19 +132,22 @@ void main() {
           OpenAIChatCompletionChoiceMessageModel(
             role: OpenAIChatMessageRole.assistant,
             content: [
-              OpenAIChatCompletionChoiceMessageContentItemModel.text('final answer'),
+              OpenAIChatCompletionChoiceMessageContentItemModel.text(
+                  'final answer'),
             ],
             reasoningContent: 'hidden chain',
           ),
         ],
       );
 
-      final Map<String, dynamic> payload = jsonDecode(fakeGateway.lastPayload!) as Map<String, dynamic>;
+      final Map<String, dynamic> payload =
+          jsonDecode(fakeGateway.lastPayload!) as Map<String, dynamic>;
       expect(payload['messages'][0]['reasoning_content'], 'hidden chain');
       expect(result.choices.first.message.reasoningContent, 'hidden chain');
     });
 
-    test('chat.create maps ovo response format to json_schema payload', () async {
+    test('chat.create maps ovo response format to json_schema payload',
+        () async {
       final fakeGateway = FakeGatewayService()
         ..nextResponse = Response.ok(
           jsonEncode({
@@ -187,12 +193,18 @@ void main() {
         }),
       );
 
-      final Map<String, dynamic> payload = jsonDecode(fakeGateway.lastPayload!) as Map<String, dynamic>;
+      final Map<String, dynamic> payload =
+          jsonDecode(fakeGateway.lastPayload!) as Map<String, dynamic>;
       expect(payload['response_format']['type'], 'json_schema');
-      expect(payload['response_format']['json_schema']['schema']['properties']['status']['type'], 'string');
+      expect(
+          payload['response_format']['json_schema']['schema']['properties']
+              ['status']['type'],
+          'string');
     });
 
-    test('chat.create throws RequestFailedException for 200 business error body', () async {
+    test(
+        'chat.create throws RequestFailedException for 200 business error body',
+        () async {
       final fakeGateway = FakeGatewayService()
         ..nextResponse = Response.ok(
           jsonEncode({
@@ -277,9 +289,93 @@ void main() {
       expect(chunks[1].choices.first.finishReason, 'stop');
       expect(chunks[2].usage?.totalTokens, 3);
 
-      final payload = jsonDecode(fakeGateway.lastPayload!) as Map<String, dynamic>;
+      final payload =
+          jsonDecode(fakeGateway.lastPayload!) as Map<String, dynamic>;
       expect(payload['stream'], true);
       expect(payload['stream_options']['include_usage'], true);
+    });
+
+    test('chat.createStream preserves UTF-8 split inside Chinese characters',
+        () async {
+      const String content = '中文回答';
+      final String sse = <String>[
+        'data: ${jsonEncode(<String, dynamic>{
+              'id': 'chatcmpl-utf8',
+              'created': 1710000005,
+              'choices': <Map<String, dynamic>>[
+                <String, dynamic>{
+                  'index': 0,
+                  'delta': <String, dynamic>{
+                    'role': 'assistant',
+                    'content': content,
+                  },
+                },
+              ],
+              'system_fingerprint': 'fp_utf8',
+            })}\n\n',
+        'data: ${jsonEncode(<String, dynamic>{
+              'id': 'chatcmpl-utf8',
+              'created': 1710000005,
+              'choices': <Map<String, dynamic>>[
+                <String, dynamic>{
+                  'index': 0,
+                  'delta': <String, dynamic>{},
+                  'finish_reason': 'stop',
+                },
+              ],
+              'system_fingerprint': 'fp_utf8',
+            })}\n\n',
+        'data: ${jsonEncode(<String, dynamic>{
+              'id': 'chatcmpl-utf8',
+              'created': 1710000005,
+              'choices': <dynamic>[],
+              'usage': <String, dynamic>{
+                'prompt_tokens': 2,
+                'completion_tokens': 4,
+                'total_tokens': 6,
+              },
+              'system_fingerprint': 'fp_utf8',
+            })}\n\n',
+        'data: [DONE]\n\n',
+      ].join();
+      final List<int> bytes = utf8.encode(sse);
+      final int middleStart = _indexOfBytes(bytes, utf8.encode('中'));
+      final int textStart = _indexOfBytes(bytes, utf8.encode('文'));
+      final List<List<int>> byteChunks = _splitBytes(bytes, <int>[
+        middleStart + 1,
+        textStart + 2,
+      ]);
+
+      final fakeGateway = FakeGatewayService()
+        ..nextResponse = Response.ok(
+          Stream<List<int>>.fromIterable(byteChunks),
+          headers: {'content-type': 'text/event-stream'},
+        );
+      final client = LiteOneApiClient(
+        config: const LiteOneApiClientConfig(apiKey: 'sk-test'),
+        gatewayService: fakeGateway,
+      );
+
+      final chunks = await client.chat.createStream(
+        model: 'qwen-plus',
+        messages: <OpenAIChatCompletionChoiceMessageModel>[
+          OpenAIChatCompletionChoiceMessageModel(
+            role: OpenAIChatMessageRole.user,
+            content: <OpenAIChatCompletionChoiceMessageContentItemModel>[
+              OpenAIChatCompletionChoiceMessageContentItemModel.text('hello'),
+            ],
+          ),
+        ],
+        streamOptions: const {'include_usage': true},
+      ).toList();
+
+      expect(chunks, hasLength(3));
+      final String? decodedContent =
+          chunks[0].choices.first.delta.content?.first?.text;
+      expect(decodedContent, content);
+      expect(decodedContent, isNot(contains('\uFFFD')));
+      expect(chunks[1].choices.first.finishReason, 'stop');
+      expect(chunks[2].usage?.totalTokens, 6);
     });
 
     test('chat.createStream parses reasoning_content deltas', () async {
@@ -319,11 +415,14 @@ void main() {
       expect(chunks[1].choices.first.delta.reasoningContent, 'think-2');
     });
 
-    test('chat.createStream throws RequestFailedException for business error chunk', () async {
+    test(
+        'chat.createStream throws RequestFailedException for business error chunk',
+        () async {
       final fakeGateway = FakeGatewayService()
         ..nextResponse = Response.ok(
           Stream<List<int>>.fromIterable([
-            utf8.encode('data: {"code":30015,"message":"stream business error"}\n\n'),
+            utf8.encode(
+                'data: {"code":30015,"message":"stream business error"}\n\n'),
             utf8.encode('data: [DONE]\n\n'),
           ]),
           headers: {'content-type': 'text/event-stream'},
@@ -356,4 +455,31 @@ void main() {
       );
     });
   });
+}
+
+int _indexOfBytes(List<int> bytes, List<int> pattern) {
+  for (int index = 0; index <= bytes.length - pattern.length; index++) {
+    bool matches = true;
+    for (int patternIndex = 0; patternIndex < pattern.length; patternIndex++) {
+      if (bytes[index + patternIndex] != pattern[patternIndex]) {
+        matches = false;
+        break;
+      }
+    }
+    if (matches) {
+      return index;
+    }
+  }
+  throw StateError('Byte pattern not found.');
+}
+
+List<List<int>> _splitBytes(List<int> bytes, List<int> offsets) {
+  final List<List<int>> chunks = <List<int>>[];
+  int start = 0;
+  for (final int offset in offsets) {
+    chunks.add(bytes.sublist(start, offset));
+    start = offset;
+  }
+  chunks.add(bytes.sublist(start));
+  return chunks;
 }

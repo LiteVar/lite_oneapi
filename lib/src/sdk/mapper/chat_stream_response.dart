@@ -16,8 +16,8 @@ class LiteOneApiChatStreamResponseMapper {
   }) async* {
     final StringBuffer buffer = StringBuffer();
 
-    await for (final List<int> chunk in stream) {
-      buffer.write(utf8.decode(chunk));
+    await for (final String chunk in utf8.decoder.bind(stream)) {
+      buffer.write(chunk);
       String current = buffer.toString();
       int delimiterIndex = current.indexOf('\n\n');
 
@@ -32,7 +32,8 @@ class LiteOneApiChatStreamResponseMapper {
             throw StateError('lite_oneapi stream returned a non-object chunk.');
           }
           try {
-            LiteOneApiErrorMapper.throwIfBusinessErrorMap(decoded, statusCode: statusCode);
+            LiteOneApiErrorMapper.throwIfBusinessErrorMap(decoded,
+                statusCode: statusCode);
           } on RequestFailedException {
             rethrow;
           }
@@ -55,7 +56,8 @@ class LiteOneApiChatStreamResponseMapper {
         if (decoded is! Map<String, dynamic>) {
           throw StateError('lite_oneapi stream returned a non-object chunk.');
         }
-        LiteOneApiErrorMapper.throwIfBusinessErrorMap(decoded, statusCode: statusCode);
+        LiteOneApiErrorMapper.throwIfBusinessErrorMap(decoded,
+            statusCode: statusCode);
         yield OpenAIStreamChatCompletionModel.fromMap(decoded);
       }
     }

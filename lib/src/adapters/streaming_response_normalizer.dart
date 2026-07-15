@@ -44,8 +44,8 @@ class StreamingResponseNormalizer {
   static Stream<List<int>> normalizeSseStream(Stream<List<int>> stream) async* {
     final StringBuffer buffer = StringBuffer();
 
-    await for (final List<int> chunk in stream) {
-      buffer.write(utf8.decode(chunk));
+    await for (final String chunk in utf8.decoder.bind(stream)) {
+      buffer.write(chunk);
       String current = buffer.toString();
       int delimiterIndex = current.indexOf('\n\n');
 

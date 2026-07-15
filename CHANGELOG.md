@@ -1,3 +1,7 @@
+## 0.2.3
+
+- Fix UTF-8 decoding when multibyte characters span streaming response chunks.
+
 ## 0.2.2
 
 - fix logging performance issue on windows
