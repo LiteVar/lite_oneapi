@@ -42,29 +42,46 @@ class StreamingResponseNormalizer {
   }
 
   static Stream<List<int>> normalizeSseStream(Stream<List<int>> stream) async* {
-    final StringBuffer buffer = StringBuffer();
+    final List<int> byteBuffer = <int>[];
 
-    await for (final String chunk in utf8.decoder.bind(stream)) {
-      buffer.write(chunk);
-      String current = buffer.toString();
-      int delimiterIndex = current.indexOf('\n\n');
+    await for (final List<int> chunk in stream) {
+      byteBuffer.addAll(chunk);
+      int boundary = _lastEventBoundary(byteBuffer);
+      if (boundary < 0) continue;
 
-      while (delimiterIndex != -1) {
-        final String frame = current.substring(0, delimiterIndex);
-        current = current.substring(delimiterIndex + 2);
-        yield utf8.encode(_normalizeFrame(frame));
-        delimiterIndex = current.indexOf('\n\n');
-      }
-
-      buffer
+      final List<int> complete = byteBuffer.sublist(0, boundary);
+      final List<int> remainder = byteBuffer.sublist(boundary);
+      byteBuffer
         ..clear()
-        ..write(current);
+        ..addAll(remainder);
+
+      final String decoded = utf8.decode(complete, allowMalformed: true);
+      for (final String event in decoded.replaceAll('\r\n', '\n').split('\n\n')) {
+        if (event.trim().isEmpty) continue;
+        yield utf8.encode(_normalizeFrame(event));
+      }
     }
 
-    final String remaining = buffer.toString().trim();
-    if (remaining.isNotEmpty) {
-      yield utf8.encode(_normalizeFrame(remaining));
+    if (byteBuffer.isNotEmpty) {
+      final String decoded = utf8.decode(byteBuffer, allowMalformed: true).trim();
+      if (decoded.isNotEmpty) {
+        yield utf8.encode(_normalizeFrame(decoded));
+      }
     }
+  }
+
+  static int _lastEventBoundary(List<int> bytes) {
+    for (int i = bytes.length - 1; i >= 1; i--) {
+      if (bytes[i] != 0x0A) continue;
+      if (bytes[i - 1] == 0x0A) return i + 1; // \n\n
+      if (i >= 3 &&
+          bytes[i - 1] == 0x0D &&
+          bytes[i - 2] == 0x0A &&
+          bytes[i - 3] == 0x0D) {
+        return i + 1; // \r\n\r\n
+      }
+    }
+    return -1;
   }
 
   static String _normalizeFrame(String frame) {
