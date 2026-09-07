@@ -1,3 +1,7 @@
+## 0.2.4
+
+- Fix windows permission issues for log file creation
+
 ## 0.2.3
 
 - Fix UTF-8 decoding when multibyte characters span streaming response chunks.
