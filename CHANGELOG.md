@@ -1,3 +1,11 @@
+## 0.3.0
+
+- Normalize OpenAI reasoning controls across provider-specific thinking APIs.
+- Align provider Chat Completions fields, error handling, and authentication headers.
+- Refresh model mappings and support fractional penalties in request schemas and the SDK.
+- Add Doubao Ark Seed and Hunyuan TokenHub Chat Completions adapters.
+- Preserve Doubao encrypted reasoning fields and normalize provider reasoning levels.
+
 ## 0.2.4
 
 - Fix windows permission issues for log file creation

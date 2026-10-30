@@ -4,10 +4,14 @@ import '../openai/adapter.dart';
 
 class KimiAdapter extends OpenAIAdapter {
   @override
+  String get providerName => 'kimi';
+
+  @override
   Map<String, String> setupRequestHeaders(Request request, Meta meta) {
     Map<String, String> headers = {};
     headers.addAll(request.headers);
-    headers["Accept"] = meta.isStream ? "text/event-stream" : "application/json";
+    headers["Accept"] =
+        meta.isStream ? "text/event-stream" : "application/json";
     return headers;
   }
 }

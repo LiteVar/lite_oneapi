@@ -8,9 +8,9 @@ part 'chat_completions_request.g.dart';
 class ChatCompletionRequest {
   List<Message> messages;
   String model;
-  int? frequency_penalty;
+  double? frequency_penalty;
   int? max_tokens;
-  int? presence_penalty;
+  double? presence_penalty;
   Thinking? thinking;
   String? reasoning_effort;
   ResponseFormat? response_format;

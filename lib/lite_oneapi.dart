@@ -8,6 +8,7 @@ export 'src/api/middleware.dart';
 export 'src/api/router.dart';
 export 'src/api/controller.dart';
 export 'src/sdk/lite_oneapi_client.dart';
+export 'src/sdk/mapper/encrypted_content.dart';
 export 'src/sdk/config/client_config.dart';
 export 'src/utils/logger.dart';
 export 'src/utils/dir.dart';

@@ -42,6 +42,7 @@ class LiteOneApiChat implements OpenAIChat {
     int? n,
     Object? stop,
     int? maxTokens,
+    int? maxCompletionTokens,
     double? presencePenalty,
     double? frequencyPenalty,
     Map<String, dynamic>? logitBias,
@@ -53,6 +54,8 @@ class LiteOneApiChat implements OpenAIChat {
     http.Client? client,
     String? reasoningEffort,
     bool? enableThinking,
+    Map<String, dynamic>? thinking,
+    Map<String, dynamic>? extraBody,
   }) async {
     final Map<String, dynamic> requestBody = LiteOneApiChatRequestBuilder(
       config: config,
@@ -65,6 +68,7 @@ class LiteOneApiChat implements OpenAIChat {
       n: n,
       stop: stop,
       maxTokens: maxTokens,
+      maxCompletionTokens: maxCompletionTokens,
       presencePenalty: presencePenalty,
       frequencyPenalty: frequencyPenalty,
       logitBias: logitBias,
@@ -75,6 +79,8 @@ class LiteOneApiChat implements OpenAIChat {
       topLogprobs: topLogprobs,
       reasoningEffort: reasoningEffort,
       enableThinking: enableThinking,
+      thinking: thinking,
+      extraBody: extraBody,
       stream: false,
     ).build();
 
@@ -108,6 +114,7 @@ class LiteOneApiChat implements OpenAIChat {
     int? n,
     Object? stop,
     int? maxTokens,
+    int? maxCompletionTokens,
     double? presencePenalty,
     double? frequencyPenalty,
     Map<String, dynamic>? logitBias,
@@ -118,6 +125,8 @@ class LiteOneApiChat implements OpenAIChat {
     Map<String, dynamic>? streamOptions,
     String? reasoningEffort,
     bool? enableThinking,
+    Map<String, dynamic>? thinking,
+    Map<String, dynamic>? extraBody,
   }) async* {
     final Map<String, dynamic> requestBody = LiteOneApiChatRequestBuilder(
       config: config,
@@ -130,6 +139,7 @@ class LiteOneApiChat implements OpenAIChat {
       n: n,
       stop: stop,
       maxTokens: maxTokens,
+      maxCompletionTokens: maxCompletionTokens,
       presencePenalty: presencePenalty,
       frequencyPenalty: frequencyPenalty,
       logitBias: logitBias,
@@ -139,6 +149,8 @@ class LiteOneApiChat implements OpenAIChat {
       streamOptions: streamOptions,
       reasoningEffort: reasoningEffort,
       enableThinking: enableThinking,
+      thinking: thinking,
+      extraBody: extraBody,
       stream: true,
     ).build();
 
@@ -176,6 +188,7 @@ class LiteOneApiChat implements OpenAIChat {
     int? n,
     Object? stop,
     int? maxTokens,
+    int? maxCompletionTokens,
     double? presencePenalty,
     double? frequencyPenalty,
     Map<String, dynamic>? logitBias,
@@ -185,6 +198,8 @@ class LiteOneApiChat implements OpenAIChat {
     int? seed,
     String? reasoningEffort,
     bool? enableThinking,
+    Map<String, dynamic>? thinking,
+    Map<String, dynamic>? extraBody,
   }) {
     return createStream(
       model: model,
@@ -196,6 +211,7 @@ class LiteOneApiChat implements OpenAIChat {
       n: n,
       stop: stop,
       maxTokens: maxTokens,
+      maxCompletionTokens: maxCompletionTokens,
       presencePenalty: presencePenalty,
       frequencyPenalty: frequencyPenalty,
       logitBias: logitBias,
@@ -205,6 +221,8 @@ class LiteOneApiChat implements OpenAIChat {
       client: client,
       reasoningEffort: reasoningEffort,
       enableThinking: enableThinking,
+      thinking: thinking,
+      extraBody: extraBody,
     );
   }
 

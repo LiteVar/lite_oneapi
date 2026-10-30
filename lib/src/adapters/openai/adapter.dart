@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import '../../adapters/adapter.dart';
 import '../../adapters/request_compatibility_patch.dart';
+import '../../adapters/reasoning_compatibility.dart';
 import '../../adapters/openai/handler.dart';
 import '../../api/meta.dart';
 
 class OpenAIAdapter extends LLMAdapter {
+  String get providerName => 'openai';
+
   @override
   ResponseHandler get responseHandler => OpenAIResponseHandler();
 
@@ -108,11 +111,10 @@ class OpenAIAdapter extends LLMAdapter {
   Map<String, String> setupRequestHeaders(Request request, Meta meta) {
     Map<String, String> headers = {};
     headers.addAll(request.headers);
+    headers.removeWhere((key, value) => key.toLowerCase() == 'x-dashscope-sse');
     if (meta.isStream) {
       if (headers["Accept"] != "text/event-stream")
         headers["Accept"] = "text/event-stream";
-      if (headers["X-DashScope-SSE"] != "enable")
-        headers["X-DashScope-SSE"] = "enable";
     } else {
       if (headers["Accept"] != "application/json")
         headers["Accept"] = "application/json";
@@ -125,8 +127,15 @@ class OpenAIAdapter extends LLMAdapter {
   Future<Map<String, dynamic>> convertRequest(
       Request request, Meta meta) async {
     final Map<String, dynamic> requestBody = jsonDecode(meta.requestBody);
-    return RequestCompatibilityPatch.applyReasoningContentReplayPatch(
-        requestBody);
+    ReasoningCompatibility.apply(
+      body: requestBody,
+      provider: providerName,
+      model: meta.model,
+    );
+    if (providerName == 'deepseek' || providerName == 'mimo') {
+      RequestCompatibilityPatch.applyReasoningContentReplayPatch(requestBody);
+    }
+    return requestBody;
   }
 
   @override
@@ -136,6 +145,9 @@ class OpenAIAdapter extends LLMAdapter {
 
   @override
   Future<Response> doResponse(Response response, Meta meta) async {
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      return response;
+    }
     if (meta.isStream) {
       return responseHandler.handleStream(response);
     } else {

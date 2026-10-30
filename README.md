@@ -16,7 +16,7 @@ or:
 
 ```yaml
 dependencies:
-  lite_oneapi: ^0.2.0
+  lite_oneapi: ^0.3.0
 ```
 
 ## Usage
@@ -27,13 +27,19 @@ For details, see: `/bin/model_mapping.json`
 
 | Official Model / Provider                                                                                                      | Endpoint                             | Compatibility |
 |--------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|---------------|
-| OpenAI `gpt-3.5` `gpt-4` `gpt-4o` `gpt-4o-mini`                                                                                | /v1/chat/completions                 | ✅             |
-| DeepSeek `deepseek-v4-flash` `deepseek-v4-pro` `deepseek-chat` `deepseek-reasoner`                                            | /v1/chat/completions                 | ✅             |
-| Qwen `qwq-32b` `qwen-plus` `qwen-flash` `qwen3-max` `qwen3.7-max` `qwen3.6-plus` `qwen3.5-plus` `qwen3-coder-plus` and more | /compatible-mode/v1/chat/completions | ✅             |
-| MiniMax `MiniMax-M2.7` `MiniMax-M2.7-highspeed` and related M2.x models                                                       | OpenAI-compatible endpoint           | ✅             |
-| GLM `glm-5.1` `glm-5.1-highspeed`                                                                                              | OpenAI-compatible endpoint           | ✅             |
-| Kimi `kimi-k2.5` `kimi-k2.6`                                                                                                   | OpenAI-compatible endpoint           | ✅             |
-| MiMo `mimo-v2.5-pro` `mimo-v2.5` `mimo-v2-flash` `mimo-v2-pro` `mimo-v2-omni`                                                 | OpenAI-compatible endpoint           | ✅             |
+| OpenAI `gpt-6.1-sol` `gpt-6-astra` `gpt-5.5` `gpt-5.4` and earlier chat models                                              | /v1/chat/completions                 | ✅             |
+| DeepSeek `deepseek-flash` `deepseek-v4-pro` and the `deepseek-v4-flash` compatibility alias                               | /v1/chat/completions                 | ✅             |
+| Doubao Seed `doubao-seed-evolving`, Seed 2.1, and Seed 2.0 models                                                         | Volcengine Ark `/api/v3/chat/completions` | ✅        |
+| Hunyuan `hy3` and `hy4-preview` (Tencent Cloud TokenHub)                                                                   | `/v1/chat/completions`               | ✅             |
+| Qwen `qwen3.8-max` `qwen3.8-flash` `qwen3.8-omni-flash` and earlier compatible models                                      | /compatible-mode/v1/chat/completions | ✅             |
+| MiniMax `MiniMax-M3.1-Flash` `MiniMax-M3` and M2.x models                                                                   | OpenAI-compatible endpoint           | ✅             |
+| GLM `glm-5.3` `glm-5.2` `glm-5.1` and compatible models                                                                     | OpenAI-compatible endpoint           | ✅             |
+| Kimi `kimi-k3.1-pro` `kimi-k3` `kimi-k2.7-code` `kimi-k2.6` and `kimi-k2.5`                                               | OpenAI-compatible endpoint           | ✅             |
+| MiMo `mimo-v2.6-pro` `mimo-v2.6-flash` `mimo-v2.6-pro-ultraspeed` and earlier models                                      | OpenAI-compatible endpoint           | ✅             |
+
+The gateway accepts OpenAI `reasoning_effort` and the compatibility aliases `enable_thinking` and `thinking.type`. It maps these controls to each routed model's documented API. Doubao `encrypted_content` is preserved in assistant messages and streaming responses; the Dart SDK facade exposes it as `encryptedContent` on the message and replays it automatically in later requests. Doubao requests cannot include both `max_tokens` and `max_completion_tokens`. Hunyuan effort levels map to `none` / `low` / `high` for Hy3 and `none` / `high` for Hy4 Preview.
+
+Hunyuan mappings default to Tencent TokenHub's Guangzhou endpoint. For the Singapore endpoint, set `base_url` to `https://tokenhub-intl.tencentmaas.com/v1`; the `hunyuan` adapter is retained.
 
 ### HTTP Gateway
 
@@ -57,6 +63,18 @@ For details, see: `/bin/model_mapping.json`
           {
             "type": "bearer",
             "apiKey": "DeepSeek API Key, starting with sk-"
+          }
+        ],
+        "doubao": [
+          {
+            "type": "bearer",
+            "apiKey": "Volcengine Ark API key"
+          }
+        ],
+        "hunyuan": [
+          {
+            "type": "bearer",
+            "apiKey": "Tencent Cloud TokenHub API key"
           }
         ],
         "qwen": [
@@ -115,7 +133,7 @@ The gateway can route by `model`, or you can override routing per request:
 ```
 
 - `base_url` / `baseUrl`: Use a custom upstream endpoint instead of the mapped official endpoint.
-- `adapter` / `channel`: Force a specific adapter such as `openai`, `deepseek`, or `qwen`.
+- `adapter` / `channel`: Force a specific adapter such as `openai`, `deepseek`, `doubao`, `hunyuan`, or `qwen`.
 - `endpoint` / `url_path` / `urlPath`: Optional upstream path override.
 - If `base_url` is provided and the model is not found in `/bin/model_mapping.json`, the request defaults to the `openai` adapter.
 - When using a custom `base_url`, the gateway keeps the original `Authorization` header by default.

@@ -16,7 +16,7 @@ dart pub add lite_oneapi
 
 ```yaml
 dependencies:
-  lite_oneapi: ^0.2.0
+  lite_oneapi: ^0.3.0
 ```
 
 ## 使用
@@ -27,13 +27,19 @@ dependencies:
 
 | 官方大模型 / 厂商                                                                                                               | 接口                                   | 兼容情况 |
 |----------------------------------------------------------------------------------------------------------------------------|--------------------------------------|------|
-| OpenAI `gpt-3.5` `gpt-4` `gpt-4o` `gpt-4o-mini`                                                                            | /v1/chat/completions                 | ✅    |
-| DeepSeek `deepseek-v4-flash` `deepseek-v4-pro` `deepseek-chat` `deepseek-reasoner`                                        | /v1/chat/completions                 | ✅    |
-| Qwen `qwq-32b` `qwen-plus` `qwen-flash` `qwen3-max` `qwen3.7-max` `qwen3.6-plus` `qwen3.5-plus` `qwen3-coder-plus` 等模型 | /compatible-mode/v1/chat/completions | ✅    |
-| MiniMax `MiniMax-M2.7` `MiniMax-M2.7-highspeed` 及相关 M2.x 模型                                                           | OpenAI-compatible endpoint           | ✅    |
-| GLM `glm-5.1` `glm-5.1-highspeed`                                                                                          | OpenAI-compatible endpoint           | ✅    |
-| Kimi `kimi-k2.5` `kimi-k2.6`                                                                                               | OpenAI-compatible endpoint           | ✅    |
-| MiMo `mimo-v2.5-pro` `mimo-v2.5` `mimo-v2-flash` `mimo-v2-pro` `mimo-v2-omni`                                             | OpenAI-compatible endpoint           | ✅    |
+| OpenAI `gpt-6.1-sol` `gpt-6-astra` `gpt-5.5` `gpt-5.4` 及此前聊天模型                                                   | /v1/chat/completions                 | ✅    |
+| DeepSeek `deepseek-flash` `deepseek-v4-pro` 及兼容别名 `deepseek-v4-flash`                                              | /v1/chat/completions                 | ✅    |
+| 豆包 Seed `doubao-seed-evolving`、Seed 2.1 和 Seed 2.0 模型                                                          | 火山方舟 `/api/v3/chat/completions`  | ✅    |
+| 混元 `hy3`、`hy4-preview`（腾讯云 TokenHub）                                                                         | `/v1/chat/completions`               | ✅    |
+| Qwen `qwen3.8-max` `qwen3.8-flash` `qwen3.8-omni-flash` 及更早的兼容模型                                                | /compatible-mode/v1/chat/completions | ✅    |
+| MiniMax `MiniMax-M3.1-Flash` `MiniMax-M3` 及 M2.x 系列模型                                                              | OpenAI-compatible endpoint           | ✅    |
+| GLM `glm-5.3` `glm-5.2` `glm-5.1` 及兼容模型                                                                           | OpenAI-compatible endpoint           | ✅    |
+| Kimi `kimi-k3.1-pro` `kimi-k3` `kimi-k2.7-code` `kimi-k2.6` 和 `kimi-k2.5`                                             | OpenAI-compatible endpoint           | ✅    |
+| MiMo `mimo-v2.6-pro` `mimo-v2.6-flash` `mimo-v2.6-pro-ultraspeed` 及更早模型                                           | OpenAI-compatible endpoint           | ✅    |
+
+网关接受 OpenAI 的 `reasoning_effort`，以及兼容别名 `enable_thinking`、`thinking.type`，并根据所选模型转换为其官方 API 参数。豆包的 `encrypted_content` 会随 assistant 消息和流式响应透传；Dart SDK facade 可通过消息的 `encryptedContent` 读取，并会在后续请求中自动回传。豆包的 `max_tokens` 与 `max_completion_tokens` 不能同时传入。混元 Hy3 的档位会映射到 `none`、`low`、`high`，Hy4 Preview 映射到 `none`、`high`。
+
+混元默认映射到 TokenHub 广州站；新加坡站可在请求中指定 `base_url: "https://tokenhub-intl.tencentmaas.com/v1"`，`hunyuan` adapter 会沿用。
 
 ### HTTP 网关
 
@@ -57,6 +63,18 @@ dependencies:
           {
             "type": "bearer",
             "apiKey": "DeepSeek API的ApiKey，sk- 开头"
+          }
+        ],
+        "doubao": [
+          {
+            "type": "bearer",
+            "apiKey": "火山方舟 API Key"
+          }
+        ],
+        "hunyuan": [
+          {
+            "type": "bearer",
+            "apiKey": "腾讯云 TokenHub API Key"
           }
         ],
         "qwen": [
@@ -114,7 +132,7 @@ dependencies:
 ```
 
 - `base_url` / `baseUrl`：优先使用你传入的上游地址，而不是 `/bin/model_mapping.json` 中的官方地址
-- `adapter` / `channel`：强制指定 adapter，例如 `openai`、`deepseek`、`qwen`
+- `adapter` / `channel`：强制指定 adapter，例如 `openai`、`deepseek`、`doubao`、`hunyuan`、`qwen`
 - `endpoint` / `url_path` / `urlPath`：可选，显式指定转发到上游的路径
 - 当传入 `base_url` 且 `model` 不在 `/bin/model_mapping.json` 中时，默认走 `openai` adapter
 - 使用自定义 `base_url` 时，默认保留原始 `Authorization` header

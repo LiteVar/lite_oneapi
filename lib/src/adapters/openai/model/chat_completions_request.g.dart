@@ -13,7 +13,7 @@ ChatCompletionRequest _$ChatCompletionRequestFromJson(
           .map((e) => Message.fromJson(e as Map<String, dynamic>))
           .toList(),
       model: json['model'] as String,
-      frequency_penalty: (json['frequency_penalty'] as num?)?.toInt(),
+      frequency_penalty: (json['frequency_penalty'] as num?)?.toDouble(),
       function_call: json['function_call'],
       functions: (json['functions'] as List<dynamic>?)
           ?.map((e) => FunctionModel.fromJson(e as Map<String, dynamic>))
@@ -31,7 +31,7 @@ ChatCompletionRequest _$ChatCompletionRequestFromJson(
       prediction: json['prediction'] == null
           ? null
           : Prediction.fromJson(json['prediction'] as Map<String, dynamic>),
-      presence_penalty: (json['presence_penalty'] as num?)?.toInt(),
+      presence_penalty: (json['presence_penalty'] as num?)?.toDouble(),
       thinking: json['thinking'] == null
           ? null
           : Thinking.fromJson(json['thinking'] as Map<String, dynamic>),

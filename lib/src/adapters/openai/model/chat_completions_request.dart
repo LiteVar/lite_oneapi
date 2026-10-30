@@ -9,7 +9,7 @@ class ChatCompletionRequest {
   List<Message> messages;
   String model;
   Audio? audio;
-  int? frequency_penalty;
+  double? frequency_penalty;
   @Deprecated('Deprecated in favor of tool_choice.') dynamic function_call;  /// String: `none`is the default when no functions are present; `auto` is the default if functions are present. Object: FunctionCall
   @Deprecated('Deprecated in favor of tools..') List<FunctionModel>? functions;
   Map<String, dynamic>? logit_bias;
@@ -21,7 +21,7 @@ class ChatCompletionRequest {
   int? n;
   bool? parallel_tool_calls;
   Prediction? prediction;
-  int? presence_penalty;
+  double? presence_penalty;
   Thinking? thinking;
   String? reasoning_effort; /// `low`, `medium`, `high`
   ResponseFormat? response_format;

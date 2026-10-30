@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:shelf/shelf.dart';
@@ -23,12 +25,17 @@ class ApiClient {
         method, requestURL, headers, requestBody,
         onRequestSent: onRequestSent);
     if (httpStreamedResponse.statusCode != 200) {
-      String message =
-          "Failed to connect to SSE stream: ${httpStreamedResponse.reasonPhrase}";
+      final String body =
+          await utf8.decoder.bind(httpStreamedResponse.stream).join();
       logger.log(LogModule.sse, "Request handle",
-          detail: "statusCode: ${httpStreamedResponse.statusCode}, $message",
+          detail:
+              "statusCode: ${httpStreamedResponse.statusCode}, ${httpStreamedResponse.reasonPhrase}",
           level: Level.WARNING);
-      return Response(httpStreamedResponse.statusCode, body: message);
+      return Response(
+        httpStreamedResponse.statusCode,
+        body: body,
+        headers: httpStreamedResponse.headers,
+      );
     }
     return Response.ok(
       logSseStream(httpStreamedResponse.stream),

@@ -5,6 +5,7 @@ import 'package:dart_openai_sdk/dart_openai_sdk.dart'
 
 import '../config/client_config.dart';
 import 'response_format_mapper.dart';
+import '../mapper/encrypted_content.dart';
 
 class LiteOneApiChatRequestBuilder {
   final LiteOneApiClientConfig config;
@@ -17,6 +18,7 @@ class LiteOneApiChatRequestBuilder {
   final int? n;
   final Object? stop;
   final int? maxTokens;
+  final int? maxCompletionTokens;
   final double? presencePenalty;
   final double? frequencyPenalty;
   final Map<String, dynamic>? logitBias;
@@ -28,6 +30,8 @@ class LiteOneApiChatRequestBuilder {
   final Map<String, dynamic>? streamOptions;
   final String? reasoningEffort;
   final bool? enableThinking;
+  final Map<String, dynamic>? thinking;
+  final Map<String, dynamic>? extraBody;
   final bool stream;
 
   const LiteOneApiChatRequestBuilder({
@@ -41,6 +45,7 @@ class LiteOneApiChatRequestBuilder {
     this.n,
     this.stop,
     this.maxTokens,
+    this.maxCompletionTokens,
     this.presencePenalty,
     this.frequencyPenalty,
     this.logitBias,
@@ -52,15 +57,24 @@ class LiteOneApiChatRequestBuilder {
     this.streamOptions,
     this.reasoningEffort,
     this.enableThinking,
+    this.thinking,
+    this.extraBody,
     required this.stream,
   });
 
   Map<String, dynamic> build() {
+    if (maxTokens != null && maxCompletionTokens != null) {
+      throw ArgumentError(
+        '`maxTokens` and `maxCompletionTokens` cannot be used together.',
+      );
+    }
     return {
+      if (extraBody != null) ...extraBody!,
       "model": model,
       if (stream) "stream": true,
-      "messages":
-          messages.map((message) => message.toMap()).toList(growable: false),
+      "messages": messages
+          .map(LiteOneApiEncryptedContent.toMessageMap)
+          .toList(growable: false),
       if (tools != null)
         "tools": tools!.map((tool) => tool.toMap()).toList(growable: false),
       if (toolChoice != null) "tool_choice": toolChoice,
@@ -68,7 +82,9 @@ class LiteOneApiChatRequestBuilder {
       if (topP != null) "top_p": topP,
       if (n != null) "n": n,
       if (stop != null) "stop": stop,
-      if (maxTokens != null) "max_completion_tokens": maxTokens,
+      if (maxTokens != null) "max_tokens": maxTokens,
+      if (maxCompletionTokens != null)
+        "max_completion_tokens": maxCompletionTokens,
       if (presencePenalty != null) "presence_penalty": presencePenalty,
       if (frequencyPenalty != null) "frequency_penalty": frequencyPenalty,
       if (logitBias != null) "logit_bias": logitBias,
@@ -82,6 +98,7 @@ class LiteOneApiChatRequestBuilder {
         "stream_options": streamOptions,
       if (reasoningEffort != null) "reasoning_effort": reasoningEffort,
       if (enableThinking != null) "enable_thinking": enableThinking,
+      if (thinking != null) "thinking": thinking,
       if (config.baseUrl != null && config.baseUrl!.isNotEmpty)
         "base_url": config.baseUrl,
       if (config.adapter != null && config.adapter!.isNotEmpty)

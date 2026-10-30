@@ -6,6 +6,7 @@ import 'package:dart_openai_sdk/dart_openai_sdk.dart'
     show OpenAIStreamChatCompletionModel, RequestFailedException;
 
 import 'error_mapper.dart';
+import 'encrypted_content.dart';
 
 class LiteOneApiChatStreamResponseMapper {
   const LiteOneApiChatStreamResponseMapper._();
@@ -28,7 +29,8 @@ class LiteOneApiChatStreamResponseMapper {
         ..addAll(remainder);
 
       final String decoded = utf8.decode(complete, allowMalformed: true);
-      for (final String event in decoded.replaceAll('\r\n', '\n').split('\n\n')) {
+      for (final String event
+          in decoded.replaceAll('\r\n', '\n').split('\n\n')) {
         if (event.trim().isEmpty) continue;
 
         final String? data = _extractData(event);
@@ -43,13 +45,17 @@ class LiteOneApiChatStreamResponseMapper {
           } on RequestFailedException {
             rethrow;
           }
-          yield OpenAIStreamChatCompletionModel.fromMap(decodedJson);
+          final OpenAIStreamChatCompletionModel chunk =
+              OpenAIStreamChatCompletionModel.fromMap(decodedJson);
+          LiteOneApiEncryptedContent.attachStreamChunk(decodedJson, chunk);
+          yield chunk;
         }
       }
     }
 
     if (byteBuffer.isNotEmpty) {
-      final String decoded = utf8.decode(byteBuffer, allowMalformed: true).trim();
+      final String decoded =
+          utf8.decode(byteBuffer, allowMalformed: true).trim();
       if (decoded.isNotEmpty) {
         final String? data = _extractData(decoded);
         if (data != null && data != '[DONE]') {
@@ -59,7 +65,10 @@ class LiteOneApiChatStreamResponseMapper {
           }
           LiteOneApiErrorMapper.throwIfBusinessErrorMap(decodedJson,
               statusCode: statusCode);
-          yield OpenAIStreamChatCompletionModel.fromMap(decodedJson);
+          final OpenAIStreamChatCompletionModel chunk =
+              OpenAIStreamChatCompletionModel.fromMap(decodedJson);
+          LiteOneApiEncryptedContent.attachStreamChunk(decodedJson, chunk);
+          yield chunk;
         }
       }
     }

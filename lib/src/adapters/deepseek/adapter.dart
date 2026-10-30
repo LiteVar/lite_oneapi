@@ -1,170 +1,143 @@
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
-import '../openai/model/chat_completions_request.dart' as oa;
 import '../exception.dart';
 import '../request_compatibility_patch.dart';
-import 'model/chat_completions_request.dart';
+import '../reasoning_compatibility.dart';
 import '../../define.dart';
 import '../../api/meta.dart';
 import '../openai/adapter.dart';
 
 class DeepSeekAdapter extends OpenAIAdapter {
   @override
-  void init(Meta meta) {
-    if(meta.mode != RelayMode.ChatCompletions) return;
+  String get providerName => 'deepseek';
 
-    oa.ChatCompletionRequest requestBody = oa.ChatCompletionRequest.fromJson(jsonDecode(meta.requestBody));
-    if(_usesBetaFeatures(requestBody) && !meta.baseUrl.endsWith("/beta")) {
+  @override
+  void init(Meta meta) {
+    if (meta.mode != RelayMode.ChatCompletions) return;
+
+    final Map<String, dynamic> requestBody = jsonDecode(meta.requestBody);
+    if (_usesBetaFeatures(requestBody) && !meta.baseUrl.endsWith("/beta")) {
       meta.baseUrl = "${meta.baseUrl}/beta";
     }
   }
 
   @override
-  Future<Map<String, dynamic>> convertRequest(Request request, Meta meta) async {
+  Future<Map<String, dynamic>> convertRequest(
+      Request request, Meta meta) async {
     Map<String, dynamic> data = jsonDecode(meta.requestBody);
 
-    if(meta.mode == RelayMode.ChatCompletions) {
+    if (meta.mode == RelayMode.ChatCompletions) {
       return _relayChatCompletions(data);
     }
     return data;
   }
 
   Map<String, dynamic> _relayChatCompletions(Map<String, dynamic> data) {
+    ReasoningCompatibility.apply(
+      body: data,
+      provider: providerName,
+      model: data['model'] as String? ?? '',
+    );
     RequestCompatibilityPatch.applyReasoningContentReplayPatch(data);
-    oa.ChatCompletionRequest oaRequestBody = oa.ChatCompletionRequest.fromJson(data);
-    ChatCompletionRequest requestBody = _convertRequest(oaRequestBody);
-    return requestBody.toJson();
-  }
 
-  ChatCompletionRequest _convertRequest(oa.ChatCompletionRequest oaRequest) {
-    return ChatCompletionRequest(
-      messages: oaRequest.messages.map((message)=>_convertMessage(message)).toList(),
-      model: oaRequest.model,
-      frequency_penalty: oaRequest.frequency_penalty,
-      max_tokens: oaRequest.max_tokens??oaRequest.max_completion_tokens,
-      presence_penalty: oaRequest.presence_penalty,
-      thinking: _convertThinking(oaRequest.thinking),
-      reasoning_effort: oaRequest.reasoning_effort,
-      response_format: _convertResponseFormat(oaRequest.response_format),
-      stop: oaRequest.stop,
-      stream: oaRequest.stream,
-      stream_options: _convertStreamOptions(oaRequest.stream_options),
-      temperature: oaRequest.temperature,
-      tool_choice: _convertToolChoice(oaRequest.tool_choice),
-      top_p: oaRequest.top_p,
-      tools: oaRequest.tools?.map((tool)=>_convertTool(tool)).toList(),
-      logprobs: oaRequest.logprobs,
-      top_logprobs: oaRequest.top_logprobs
-    );
-  }
-
-  Message _convertMessage(oa.Message oaMessage) {
-    String oaRole = oaMessage.role;
-    if(oaRole == oa.RoleType.DEVELOPER) {
-      oaRole = RoleType.SYSTEM;
+    final dynamic rawMessages = data['messages'];
+    if (rawMessages is! List) {
+      throw UnsupportedRequestException('`messages` must be an array.');
     }
-
-    return Message(
-      role: oaRole,
-      content: _convertContent(oaMessage.content),
-      name: oaMessage.name,
-      prefix: oaMessage.prefix,
-      reasoning_content: oaMessage.reasoning_content,
-      tool_calls: oaMessage.tool_calls?.map((oaToolCall) => _convertToolCall(oaToolCall)).toList(), /// for assistant
-      tool_call_id: oaMessage.tool_call_id /// for tool
-    );
-  }
-
-  ToolCall _convertToolCall(oa.ToolCall oaToolCall) {
-    return ToolCall(
-      function: _convertFunctionCalledModel(oaToolCall.function),
-      id: oaToolCall.id,
-      type: oaToolCall.type
-    );
-  }
-
-  FunctionCalledModel _convertFunctionCalledModel(oa.FunctionCalledModel oaFunctionCalledModel) {
-    return FunctionCalledModel(
-      name: oaFunctionCalledModel.name,
-      arguments: oaFunctionCalledModel.arguments
-    );
-  }
-
-  ResponseFormat? _convertResponseFormat(oa.ResponseFormat? oaResponseFormat) {
-    if(oaResponseFormat == null) return null;
-    return ResponseFormat(
-      type: oaResponseFormat.type,
-    );
-  }
-
-  StreamOptions? _convertStreamOptions(oa.StreamOptions? oaStreamOptions) {
-    if(oaStreamOptions == null) return null;
-    return StreamOptions(
-      include_usage: oaStreamOptions.include_usage
-    );
-  }
-
-  Tool _convertTool(oa.Tool oaTool) {
-    return Tool(
-      type: oaTool.type,
-      function: _convertFunctionModel(oaTool.function)
-    );
-  }
-
-  FunctionModel _convertFunctionModel(oa.FunctionModel oaFunctionModel) {
-    return FunctionModel(
-      name: oaFunctionModel.name,
-      description: oaFunctionModel.description,
-      parameters: oaFunctionModel.parameters,
-      strict: oaFunctionModel.strict,
-    );
-  }
-
-  Thinking? _convertThinking(oa.Thinking? oaThinking) {
-    if(oaThinking == null) return null;
-    return Thinking(
-      type: oaThinking.type,
-    );
-  }
-
-  dynamic _convertToolChoice(dynamic tool_choice) {
-    if(tool_choice is String) {
-      return tool_choice;
-    } else if(tool_choice is oa.Tool) {
-      return _convertTool(tool_choice);
-    }
-  }
-
-  bool _usesBetaFeatures(oa.ChatCompletionRequest requestBody) {
-    return requestBody.messages.any((message) {
-      return message.prefix == true || message.reasoning_content != null;
-    });
-  }
-
-  String _convertContent(dynamic content) {
-    if(content is String) {
-      return content;
-    } else if(content is List<dynamic>) {
-      return _convertContentList(content);
-    } else {
-      throw UnsupportedRequestException("DeepSeek chat completions only supports text content messages.");
-    }
-  }
-
-  String _convertContentList(List<dynamic> oaContentList) {
-    List<String> textParts = [];
-
-    for(final dynamic item in oaContentList) {
-      oa.Content contentItem = oa.Content.fromJson(item as Map<String, dynamic>);
-      if(contentItem.type == "text" && contentItem.text != null) {
-        textParts.add(contentItem.text!);
-        continue;
+    data['messages'] = rawMessages.map((dynamic rawMessage) {
+      if (rawMessage is! Map) {
+        throw UnsupportedRequestException('Each message must be an object.');
       }
+      final Map<String, dynamic> message =
+          Map<String, dynamic>.from(rawMessage);
+      if (message['role'] == 'developer') message['role'] = 'system';
+      if (message.containsKey('content')) {
+        message['content'] = _convertContent(message['content'], message);
+      } else if (message['role'] != 'assistant' ||
+          (message['tool_calls'] == null && message['function_call'] == null)) {
+        throw UnsupportedRequestException(
+          'Message content is required unless an assistant tool call is present.',
+        );
+      }
+      return message;
+    }).toList(growable: false);
+
+    final dynamic maxTokens = data['max_tokens'];
+    final dynamic maxCompletionTokens = data['max_completion_tokens'];
+    if (maxTokens != null &&
+        maxCompletionTokens != null &&
+        maxTokens != maxCompletionTokens) {
       throw UnsupportedRequestException(
-        "DeepSeek chat completions currently only supports text content parts, but received `${contentItem.type}`.",
+        '`max_tokens` conflicts with `max_completion_tokens`.',
       );
     }
+    if (maxTokens == null && maxCompletionTokens != null) {
+      data['max_tokens'] = maxCompletionTokens;
+    }
+    data.remove('max_completion_tokens');
 
-    return textParts.join("\n");
+    if (data['tools'] == null && data['functions'] is List) {
+      data['tools'] = (data['functions'] as List).map((dynamic function) {
+        if (function is! Map) {
+          throw UnsupportedRequestException('Each function must be an object.');
+        }
+        return <String, dynamic>{
+          'type': 'function',
+          'function': Map<String, dynamic>.from(function),
+        };
+      }).toList(growable: false);
+    }
+    if (data['tool_choice'] == null && data['function_call'] != null) {
+      final dynamic functionCall = data['function_call'];
+      if (functionCall is Map) {
+        data['tool_choice'] = <String, dynamic>{
+          'type': 'function',
+          'function': <String, dynamic>{'name': functionCall['name']},
+        };
+      } else {
+        data['tool_choice'] = functionCall;
+      }
+    }
+    data.remove('functions');
+    data.remove('function_call');
+    final dynamic responseFormat = data['response_format'];
+    if (responseFormat is Map && responseFormat['type'] == 'json_schema') {
+      throw UnsupportedRequestException(
+        'DeepSeek Chat Completions supports `text` and `json_object` response formats, not `json_schema`.',
+      );
+    }
+    return data;
+  }
+
+  bool _usesBetaFeatures(Map<String, dynamic> requestBody) {
+    final dynamic messages = requestBody['messages'];
+    if (messages is! List) return false;
+    return messages.any((dynamic message) =>
+        message is Map &&
+        (message['prefix'] == true || message['reasoning_content'] != null));
+  }
+
+  dynamic _convertContent(dynamic content, Map<String, dynamic> message) {
+    if (content == null &&
+        message['role'] == 'assistant' &&
+        (message['tool_calls'] != null || message['function_call'] != null)) {
+      return null;
+    }
+    if (content is String) {
+      return content;
+    } else if (content is List<dynamic>) {
+      for (final dynamic item in content) {
+        if (item is! Map ||
+            !const {'text', 'image_url'}.contains(item['type'])) {
+          throw UnsupportedRequestException(
+            'DeepSeek Chat Completions supports text and image_url content parts only.',
+          );
+        }
+      }
+      return content;
+    } else {
+      throw UnsupportedRequestException(
+          "DeepSeek chat completions only supports text content messages.");
+    }
   }
 }

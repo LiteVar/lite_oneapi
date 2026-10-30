@@ -25,7 +25,7 @@ ChatCompletionRequest _$ChatCompletionRequestFromJson(
       (json['modalities'] as List<dynamic>?)?.map((e) => e as String).toList(),
   temperature: (json['temperature'] as num?)?.toDouble(),
   top_p: (json['top_p'] as num?)?.toDouble(),
-  presence_penalty: (json['presence_penalty'] as num?)?.toInt(),
+  presence_penalty: (json['presence_penalty'] as num?)?.toDouble(),
   response_format:
       json['response_format'] == null
           ? null

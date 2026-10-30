@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'adapters/adapter.dart';
 import 'adapters/deepseek/adapter.dart';
+import 'adapters/doubao/adapter.dart';
 import 'adapters/glm/adapter.dart';
+import 'adapters/hunyuan/adapter.dart';
 import 'adapters/kimi/adapter.dart';
 import 'adapters/mimo/adapter.dart';
 import 'adapters/minimax/adapter.dart';
@@ -15,11 +17,14 @@ import 'utils/pool.dart';
 Map<String, LLMAdapter> channelAdapterMapper = {
   "openai": OpenAIAdapter(),
   "deepseek": DeepSeekAdapter(),
+  "doubao": DoubaoAdapter(),
   "glm": GLMAdapter(),
+  "hunyuan": HunyuanAdapter(),
   "kimi": KimiAdapter(),
   "mimo": MimoAdapter(),
   "minimax": MiniMaxAdapter(),
   "qwen": QwenAdapter(),
+
   /// Add other adapters
 };
 
@@ -30,9 +35,11 @@ final Map<String, Pool<ApiKey>>? adapterKeyPools = initApiKeyPool();
 
 ModelMapping initModelMapping() {
   String exeDir = Dir.executableDir();
-  String modelMappingFilePath = '$exeDir${Platform.pathSeparator}model_mapping.json';
+  String modelMappingFilePath =
+      '$exeDir${Platform.pathSeparator}model_mapping.json';
   String modelMappingJsonString = File(modelMappingFilePath).readAsStringSync();
-  final Map<String, dynamic> modelMappingJson = jsonDecode(modelMappingJsonString);
+  final Map<String, dynamic> modelMappingJson =
+      jsonDecode(modelMappingJsonString);
   final ModelMapping modelMapping = ModelMapping.fromJson(modelMappingJson);
   return modelMapping;
 }
@@ -54,14 +61,14 @@ Env? initEnv() {
     final Map<String, dynamic> configJson = jsonDecode(envJsonString);
     final Env env = Env.fromJson(configJson);
     return env;
-  } catch(e) {
+  } catch (e) {
     return null;
   }
 }
 
 Map<String, Pool<ApiKey>>? initApiKeyPool() {
   Map<String, Pool<ApiKey>> pools = {};
-  if(env != null) {
+  if (env != null) {
     env!.adapterKeys.forEach((key, value) {
       pools[key] = Pool(value);
     });

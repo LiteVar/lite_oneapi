@@ -47,7 +47,7 @@ class LiteOneApiGatewayService {
         requestPath: requestPath,
         requestHeaders: requestHeaders,
       );
-      return prepared.adapter.doRequest(
+      return await prepared.adapter.doRequest(
         _buildLocalRequest(
           payload: payload,
           requestPath: requestPath,
@@ -57,15 +57,53 @@ class LiteOneApiGatewayService {
         prepared.meta,
       );
     } on AdapterNotFoundException catch (e) {
-      return Response.notFound(e.toString());
+      return _errorResponse(
+        404,
+        e.message,
+        type: 'invalid_request_error',
+        code: 'model_not_found',
+      );
     } on UnsupportedRequestException catch (e) {
-      return Response(400,
-          body: jsonEncode(e.toJson()),
-          headers: {"content-type": "application/json"});
+      return _errorResponse(
+        400,
+        e.message,
+        type: 'invalid_request_error',
+        code: 'invalid_request',
+      );
+    } on FormatException catch (e) {
+      return _errorResponse(
+        400,
+        'Invalid JSON request: ${e.message}',
+        type: 'invalid_request_error',
+        code: 'invalid_json',
+      );
     } on PoolExhaustedException catch (e) {
-      return Response.internalServerError(
-          body: "Adapter ApiKey error: ${e.toString()}");
+      return _errorResponse(
+        500,
+        'Adapter API key pool is exhausted: ${e.toString()}',
+        type: 'server_error',
+        code: 'api_key_pool_error',
+      );
     }
+  }
+
+  Response _errorResponse(
+    int statusCode,
+    String message, {
+    required String type,
+    required String code,
+  }) {
+    return Response(
+      statusCode,
+      body: jsonEncode({
+        'error': {
+          'message': message,
+          'type': type,
+          'code': code,
+        },
+      }),
+      headers: {'content-type': 'application/json'},
+    );
   }
 
   Request _buildLocalRequest({
@@ -90,22 +128,59 @@ class LiteOneApiGatewayService {
     required String requestPath,
     required Map<String, String> requestHeaders,
   }) {
-    final Map<String, dynamic> data = jsonDecode(payload);
+    final dynamic decoded = jsonDecode(payload);
+    if (decoded is! Map) {
+      throw UnsupportedRequestException(
+          'The request body must be a JSON object.');
+    }
+    final Map<String, dynamic> data = Map<String, dynamic>.from(decoded);
     final String? customBaseUrl = _readString(data, ["base_url", "baseUrl"]);
     final String? customAdapter = _readString(data, ["adapter", "channel"]);
     final String? endpoint =
         _readString(data, ["endpoint", "url_path", "urlPath"]);
     final Map<String, dynamic> requestData = _sanitizeRequestData(data);
-    final String? model = data["model"];
+    final dynamic rawModel = data['model'];
+    if (rawModel == null) {
+      throw UnsupportedRequestException('`model` is required.');
+    }
+    if (rawModel is! String || rawModel.isEmpty) {
+      throw UnsupportedRequestException('`model` must be a non-empty string.');
+    }
+    final String model = rawModel;
     logger.log(LogModule.api, "Request handle", detail: "model: $model");
 
-    if (model == null) {
-      throw AdapterNotFoundException("NULL");
+    if (requestPath.endsWith('/chat/completions')) {
+      final dynamic messages = data['messages'];
+      if (messages is! List || messages.isEmpty) {
+        throw UnsupportedRequestException(
+          '`messages` must be a non-empty array for chat completions.',
+        );
+      }
+      for (final dynamic message in messages) {
+        if (message is! Map ||
+            !const {
+              'system',
+              'developer',
+              'user',
+              'assistant',
+              'tool',
+              'function',
+            }.contains(message['role'])) {
+          throw UnsupportedRequestException(
+            'Each chat message must have a supported string `role`.',
+          );
+        }
+      }
+    }
+
+    final dynamic rawStream = data['stream'];
+    if (rawStream != null && rawStream is! bool) {
+      throw UnsupportedRequestException('`stream` must be a boolean.');
     }
 
     Meta meta = Meta(
       model: model,
-      isStream: data["stream"] ?? false,
+      isStream: rawStream ?? false,
       requestBody: jsonEncode(requestData),
     );
 

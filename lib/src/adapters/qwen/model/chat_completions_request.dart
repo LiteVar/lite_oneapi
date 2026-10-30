@@ -13,7 +13,7 @@ class ChatCompletionRequest {
   List<String>? modalities;
   double? temperature;
   double? top_p;
-  int? presence_penalty;
+  double? presence_penalty;
   ResponseFormat? response_format;
   int? max_tokens;
   int? n;
