@@ -62,7 +62,8 @@ HandleMeta<IndexItem<ApiKey>> initIndexApiKey =
 };
 
 HandleMeta<String> initRelayMode = (Meta meta, String path) {
-  RelayMode relayMode = getByPath("/$path");
+  final String normalizedPath = path.startsWith('/') ? path : '/$path';
+  RelayMode relayMode = getByPath(normalizedPath);
   meta.mode = relayMode;
   logger.log(LogModule.api, "initRelayMode",
       detail: "relayMode: $relayMode", level: Level.FINEST);

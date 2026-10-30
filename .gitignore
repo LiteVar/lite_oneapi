@@ -3,6 +3,7 @@
 .dart_tool/
 /log
 .idea
+.env
 
 bin/env.json
 lite_oneapi.iml

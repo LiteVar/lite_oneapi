@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:lite_oneapi/src/adapters/openai/handler.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/openai/handler.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 

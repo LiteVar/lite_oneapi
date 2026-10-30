@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-import 'package:lite_oneapi/src/adapters/deepseek/adapter.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/deepseek/adapter.dart';
 import 'package:lite_oneapi/src/adapters/exception.dart';
-import 'package:lite_oneapi/src/adapters/glm/adapter.dart';
-import 'package:lite_oneapi/src/adapters/kimi/adapter.dart';
-import 'package:lite_oneapi/src/adapters/mimo/adapter.dart';
-import 'package:lite_oneapi/src/adapters/minimax/adapter.dart';
-import 'package:lite_oneapi/src/adapters/openai/adapter.dart';
-import 'package:lite_oneapi/src/adapters/openai/model/chat_completions_request.dart';
-import 'package:lite_oneapi/src/adapters/qwen/adapter.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/glm/adapter.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/kimi/adapter.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/mimo/adapter.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/minimax/adapter.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/openai/adapter.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/openai/model/chat_completions_request.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/qwen/adapter.dart';
 import 'package:lite_oneapi/src/adapters/reasoning_compatibility.dart';
 import 'package:lite_oneapi/src/core/gateway_service.dart';
 import 'package:lite_oneapi/src/api/meta.dart';

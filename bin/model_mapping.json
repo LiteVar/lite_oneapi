@@ -41,7 +41,7 @@
         "hy3"
       ],
       "adapter": "hunyuan",
-      "baseUrl": "https://tokenhub.tencentmaas.com/v1"
+      "baseUrl": "https://tokenhub.tencentcloudmaas.com/v1"
     },
     {
       "names": [

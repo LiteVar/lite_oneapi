@@ -1,8 +1,12 @@
 import 'dart:convert';
 
 import 'package:lite_oneapi/src/adapters/adapter.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/request.dart';
 import 'package:lite_oneapi/src/adapters/exception.dart';
 import 'package:lite_oneapi/src/adapters/model.dart';
+import 'package:lite_oneapi/src/adapters/messages/request.dart';
+import 'package:lite_oneapi/src/adapters/responses/request.dart';
+import 'package:lite_oneapi/src/define.dart';
 import 'package:lite_oneapi/src/api/meta.dart';
 import 'package:lite_oneapi/src/config.dart';
 import 'package:lite_oneapi/src/model.dart';
@@ -62,6 +66,7 @@ class LiteOneApiGatewayService {
         e.message,
         type: 'invalid_request_error',
         code: 'model_not_found',
+        requestPath: requestPath,
       );
     } on UnsupportedRequestException catch (e) {
       return _errorResponse(
@@ -69,6 +74,7 @@ class LiteOneApiGatewayService {
         e.message,
         type: 'invalid_request_error',
         code: 'invalid_request',
+        requestPath: requestPath,
       );
     } on FormatException catch (e) {
       return _errorResponse(
@@ -76,6 +82,7 @@ class LiteOneApiGatewayService {
         'Invalid JSON request: ${e.message}',
         type: 'invalid_request_error',
         code: 'invalid_json',
+        requestPath: requestPath,
       );
     } on PoolExhaustedException catch (e) {
       return _errorResponse(
@@ -83,6 +90,7 @@ class LiteOneApiGatewayService {
         'Adapter API key pool is exhausted: ${e.toString()}',
         type: 'server_error',
         code: 'api_key_pool_error',
+        requestPath: requestPath,
       );
     }
   }
@@ -92,16 +100,26 @@ class LiteOneApiGatewayService {
     String message, {
     required String type,
     required String code,
+    required String requestPath,
   }) {
+    final bool anthropicMessages = getByPath(
+            requestPath.startsWith('/') ? requestPath : '/$requestPath') ==
+        RelayMode.Messages;
+    final Map<String, dynamic> error = anthropicMessages
+        ? {
+            'type': 'error',
+            'error': {'type': type, 'message': message},
+          }
+        : {
+            'error': {
+              'message': message,
+              'type': type,
+              'code': code,
+            },
+          };
     return Response(
       statusCode,
-      body: jsonEncode({
-        'error': {
-          'message': message,
-          'type': type,
-          'code': code,
-        },
-      }),
+      body: jsonEncode(error),
       headers: {'content-type': 'application/json'},
     );
   }
@@ -138,7 +156,6 @@ class LiteOneApiGatewayService {
     final String? customAdapter = _readString(data, ["adapter", "channel"]);
     final String? endpoint =
         _readString(data, ["endpoint", "url_path", "urlPath"]);
-    final Map<String, dynamic> requestData = _sanitizeRequestData(data);
     final dynamic rawModel = data['model'];
     if (rawModel == null) {
       throw UnsupportedRequestException('`model` is required.');
@@ -149,29 +166,18 @@ class LiteOneApiGatewayService {
     final String model = rawModel;
     logger.log(LogModule.api, "Request handle", detail: "model: $model");
 
-    if (requestPath.endsWith('/chat/completions')) {
-      final dynamic messages = data['messages'];
-      if (messages is! List || messages.isEmpty) {
-        throw UnsupportedRequestException(
-          '`messages` must be a non-empty array for chat completions.',
-        );
-      }
-      for (final dynamic message in messages) {
-        if (message is! Map ||
-            !const {
-              'system',
-              'developer',
-              'user',
-              'assistant',
-              'tool',
-              'function',
-            }.contains(message['role'])) {
-          throw UnsupportedRequestException(
-            'Each chat message must have a supported string `role`.',
-          );
-        }
-      }
-    }
+    final String normalizedRequestPath =
+        requestPath.startsWith('/') ? requestPath : '/$requestPath';
+    final RelayMode relayMode = getByPath(normalizedRequestPath);
+    final Map<String, dynamic> protocolRequest = switch (relayMode) {
+      RelayMode.ChatCompletions =>
+        ChatCompletionsRequest.fromJson(data).toJson(),
+      RelayMode.Responses => ResponsesRequest.fromJson(data).toJson(),
+      RelayMode.Messages => MessagesRequest.fromJson(data).toJson(),
+      _ => Map<String, dynamic>.from(data),
+    };
+    final Map<String, dynamic> requestData =
+        _sanitizeRequestData(protocolRequest);
 
     final dynamic rawStream = data['stream'];
     if (rawStream != null && rawStream is! bool) {
@@ -198,21 +204,31 @@ class LiteOneApiGatewayService {
     );
     meta = initUseOriginalAuthorization(meta, customBaseUrl != null);
 
-    final LLMAdapter? adapter = channelAdapterMapper[modelInfo.adapter];
+    meta = initRelayMode(meta, requestPath);
+
+    final Map<String, LLMAdapter> adapterMapper = switch (meta.mode) {
+      RelayMode.Responses => responsesAdapterMapper,
+      RelayMode.Messages => messagesAdapterMapper,
+      _ => channelAdapterMapper,
+    };
+    final LLMAdapter? adapter = adapterMapper[modelInfo.adapter];
     if (adapter == null) {
-      throw AdapterNotFoundException(model);
+      throw UnsupportedRequestException(
+        'Adapter `${modelInfo.adapter}` does not support the requested API endpoint.',
+      );
     }
 
-    final String originalApiKeyWithBearer =
-        requestHeaders["Authorization"] ?? "";
+    final String originalApiKeyWithBearer = meta.mode == RelayMode.Messages
+        ? _readHeader(requestHeaders, 'x-api-key') ??
+            _readHeader(requestHeaders, 'authorization') ??
+            ''
+        : _readHeader(requestHeaders, 'authorization') ?? '';
     meta = initOriginalApiKeyWithBearer(meta, originalApiKeyWithBearer);
     if (adapterKeyPools != null && meta.useOriginalAuthorization != true) {
       final IndexItem<ApiKey> indexApiKey =
           adapterKeyPools![meta.adapterName]!.fetch();
       meta = initIndexApiKey(meta, indexApiKey);
     }
-    meta = initRelayMode(meta, requestPath);
-
     adapter.init(meta);
 
     return PreparedGatewayRequest(
@@ -230,6 +246,20 @@ class LiteOneApiGatewayService {
               name: name, adapter: llmModel.adapter, baseUrl: llmModel.baseUrl);
         }
       }
+    }
+    if (model.toLowerCase().startsWith('claude-')) {
+      return ModelInfo(
+        name: model,
+        adapter: 'anthropic',
+        baseUrl: 'https://api.anthropic.com/v1',
+      );
+    }
+    return null;
+  }
+
+  String? _readHeader(Map<String, String> headers, String name) {
+    for (final MapEntry<String, String> entry in headers.entries) {
+      if (entry.key.toLowerCase() == name.toLowerCase()) return entry.value;
     }
     return null;
   }

@@ -16,7 +16,7 @@ dart pub add lite_oneapi
 
 ```yaml
 dependencies:
-  lite_oneapi: ^0.3.0
+  lite_oneapi: ^1.0.0
 ```
 
 ## 使用
@@ -28,6 +28,7 @@ dependencies:
 | 官方大模型 / 厂商                                                                                                               | 接口                                   | 兼容情况 |
 |----------------------------------------------------------------------------------------------------------------------------|--------------------------------------|------|
 | OpenAI `gpt-6.1-sol` `gpt-6-astra` `gpt-5.5` `gpt-5.4` 及此前聊天模型                                                   | /v1/chat/completions                 | ✅    |
+| Anthropic Claude `claude-*` 模型                                                                                         | `/v1/chat/completions`（Anthropic OpenAI SDK 兼容端点） | ⚠️ 有限兼容 |
 | DeepSeek `deepseek-flash` `deepseek-v4-pro` 及兼容别名 `deepseek-v4-flash`                                              | /v1/chat/completions                 | ✅    |
 | 豆包 Seed `doubao-seed-evolving`、Seed 2.1 和 Seed 2.0 模型                                                          | 火山方舟 `/api/v3/chat/completions`  | ✅    |
 | 混元 `hy3`、`hy4-preview`（腾讯云 TokenHub）                                                                         | `/v1/chat/completions`               | ✅    |
@@ -37,9 +38,30 @@ dependencies:
 | Kimi `kimi-k3.1-pro` `kimi-k3` `kimi-k2.7-code` `kimi-k2.6` 和 `kimi-k2.5`                                             | OpenAI-compatible endpoint           | ✅    |
 | MiMo `mimo-v2.6-pro` `mimo-v2.6-flash` `mimo-v2.6-pro-ultraspeed` 及更早模型                                           | OpenAI-compatible endpoint           | ✅    |
 
+Anthropic 的 OpenAI SDK 兼容端点适合基本 Chat Completions 调用；`response_format`、`reasoning_effort` 和工具 `strict` 会被忽略，OpenAI SDK 响应也不包含 Claude thinking 内容。需要这些原生能力时使用 `/v1/messages`。
+
+### 新增协议接口
+
+三种入口分别校验、构建和转发各自协议的请求，不在协议之间转换。Responses 与 Messages 的请求字段和流式事件分别按 OpenAI、Anthropic 标准处理，厂商扩展字段会原样保留。
+
+适配器目录按协议组织：`lib/src/adapters/chat_completions/<厂商>/`、`lib/src/adapters/responses/<厂商>/`、`lib/src/adapters/messages/<厂商>/`。每个协议自己的 `request.dart` 位于对应协议目录下；`lib/src/adapters/` 根目录保留共用的 HTTP、认证和基础适配设施。
+
+| 入站接口 | 标准端点 | 上游适配厂商 |
+|---|---|---|
+| OpenAI Responses | `/v1/responses` | OpenAI、DeepSeek、千问、Kimi、豆包、混元（腾讯云 TokenHub） |
+| Anthropic Messages | `/v1/messages` | Anthropic、DeepSeek、千问、智谱 GLM、Kimi、MiniMax、豆包、混元（腾讯云 TokenHub） |
+
+#### 用 `.env` 快速测试
+
+复制 `example/.env.example` 为 `example/.env`，填写 `GATEWAY_URL`、`API_KEY`、`MODEL` 和 `ADAPTER`，然后运行 `sh example/protocol_smoke.sh`。`PROTOCOL` 可设为 `chat`、`responses`、`messages` 或 `all`；`BASE_URL` 留空时走 `model_mapping.json`，填写时覆盖上游地址，必要时用对应的 `*_ENDPOINT` 指定厂商路径。默认 `hy3` 示例支持三种协议。
+
+该脚本把 `API_KEY` 作为上游 key 透传。启动服务前请在 `bin/config.json` 启用 `mode.transparent`，或临时不使用 `bin/env.json`。这里的 `.env` 只供测试脚本读取；服务端的 key 池仍配置在 `bin/env.json`，模型默认路由仍配置在 `bin/model_mapping.json`。
+
+协议支持取决于具体模型和上游产品。比如 Responses 的历史关联、内置工具和多模态能力，以及 Messages 的 thinking、内容块和工具能力，应按对应厂商当前文档和模型范围使用。混元 Responses 与 Messages 走 TokenHub；TokenHub 的 Responses 支持列表按模型区分。MiniMax 官方 Anthropic 接口目前列出的模型为 `MiniMax-M3.1-Flash` 和 `MiniMax-M3`。
+
 网关接受 OpenAI 的 `reasoning_effort`，以及兼容别名 `enable_thinking`、`thinking.type`，并根据所选模型转换为其官方 API 参数。豆包的 `encrypted_content` 会随 assistant 消息和流式响应透传；Dart SDK facade 可通过消息的 `encryptedContent` 读取，并会在后续请求中自动回传。豆包的 `max_tokens` 与 `max_completion_tokens` 不能同时传入。混元 Hy3 的档位会映射到 `none`、`low`、`high`，Hy4 Preview 映射到 `none`、`high`。
 
-混元默认映射到 TokenHub 广州站；新加坡站可在请求中指定 `base_url: "https://tokenhub-intl.tencentmaas.com/v1"`，`hunyuan` adapter 会沿用。
+混元默认映射到 TokenHub 广州站；新加坡站可在请求中指定 `base_url: "https://tokenhub-intl.tencentcloudmaas.com/v1"`，`hunyuan` adapter 会沿用。Responses 和 Messages 的 Kimi 默认映射使用 Moonshot 国际站 `api.moonshot.ai`，Chat Completions 保持原有路由。
 
 ### HTTP 网关
 
@@ -57,6 +79,12 @@ dependencies:
           {
             "type": "bearer",
             "apiKey": "OpenAI API的ApiKey，sk- 开头"
+          }
+        ],
+        "anthropic": [
+          {
+            "type": "bearer",
+            "apiKey": "Anthropic API Key"
           }
         ],
         "deepseek": [
@@ -225,7 +253,7 @@ Future<void> main() async {
 ### 新增大模型
 
 1. 新增Adapter，假设为：`NewLLMAdapter`
-   - 在`lib/src/adapters`目录下，新增目录`newllm`
+   - 在`lib/src/adapters/chat_completions`目录下，新增目录`newllm`
    - 新增`/model`文件夹，文件夹内新增针对新增大模型的model类
    - 新增`adapter.dart`，实现`LLMAdapter`类
       - `init`：可初始化Adapter
@@ -250,6 +278,7 @@ Future<void> main() async {
       "newllm": NewLLMAdapter(),
      };
      ```
+   - Responses 和 Messages 厂商实现分别放在`responses/<厂商>`和`messages/<厂商>`，并注册到各自的`responsesAdapterMapper`、`messagesAdapterMapper`。
 3. 在`/bin/model_mapping.json`中，新增配置，用于对应系统在收到请求的`model-name`时，匹配到对应的Adapter：
    ```json
    {

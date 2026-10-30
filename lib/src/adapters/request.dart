@@ -37,13 +37,21 @@ class ApiClient {
         headers: httpStreamedResponse.headers,
       );
     }
-    return Response.ok(
-      logSseStream(httpStreamedResponse.stream),
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
+    final Map<String, String> responseHeaders =
+        Map<String, String>.from(httpStreamedResponse.headers);
+    responseHeaders.removeWhere((String key, String value) => const {
+          'connection',
+          'transfer-encoding',
+          'content-length'
+        }.contains(key.toLowerCase()));
+    responseHeaders.putIfAbsent('content-type', () => 'text/event-stream');
+    responseHeaders.putIfAbsent('cache-control', () => 'no-cache');
+    responseHeaders['connection'] = 'keep-alive';
+
+    return Response(
+      httpStreamedResponse.statusCode,
+      body: logSseStream(httpStreamedResponse.stream),
+      headers: responseHeaders,
     );
   }
 

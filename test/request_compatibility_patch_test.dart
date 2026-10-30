@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:lite_oneapi/src/adapters/deepseek/adapter.dart';
-import 'package:lite_oneapi/src/adapters/mimo/adapter.dart';
-import 'package:lite_oneapi/src/adapters/openai/adapter.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/deepseek/adapter.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/mimo/adapter.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/openai/adapter.dart';
 import 'package:lite_oneapi/src/api/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';

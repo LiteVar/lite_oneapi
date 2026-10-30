@@ -3,6 +3,8 @@ import 'extension.dart';
 enum RelayMode {
   Unknown,
   ChatCompletions,
+  Responses,
+  Messages,
   Completions,
   Embeddings,
   Moderations,
@@ -15,6 +17,8 @@ enum RelayMode {
 
 Map<String, RelayMode> pathRelayModeMap = {
   "/v1/chat/completions": RelayMode.ChatCompletions,
+  "/v1/responses": RelayMode.Responses,
+  "/v1/messages": RelayMode.Messages,
   "/v1/completions": RelayMode.Completions,
   "/v1/embeddings": RelayMode.Embeddings,
   "/v1/moderations": RelayMode.Moderations,
@@ -27,7 +31,7 @@ Map<String, RelayMode> pathRelayModeMap = {
 
 RelayMode getByPath(String path) {
   for (var entry in pathRelayModeMap.entries) {
-    if(path.hasPrefix(entry.key)) return entry.value;
+    if (path.hasPrefix(entry.key)) return entry.value;
   }
   return RelayMode.Unknown;
 }

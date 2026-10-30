@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:lite_oneapi/src/adapters/minimax/adapter.dart';
+import 'package:lite_oneapi/src/adapters/chat_completions/minimax/adapter.dart';
 import 'package:lite_oneapi/src/api/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';

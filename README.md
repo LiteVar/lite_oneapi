@@ -16,7 +16,7 @@ or:
 
 ```yaml
 dependencies:
-  lite_oneapi: ^0.3.0
+  lite_oneapi: ^1.0.0
 ```
 
 ## Usage
@@ -28,6 +28,7 @@ For details, see: `/bin/model_mapping.json`
 | Official Model / Provider                                                                                                      | Endpoint                             | Compatibility |
 |--------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|---------------|
 | OpenAI `gpt-6.1-sol` `gpt-6-astra` `gpt-5.5` `gpt-5.4` and earlier chat models                                              | /v1/chat/completions                 | ✅             |
+| Anthropic Claude `claude-*` models                                                                                          | `/v1/chat/completions` (Anthropic OpenAI SDK-compatible endpoint) | ⚠️ Limited |
 | DeepSeek `deepseek-flash` `deepseek-v4-pro` and the `deepseek-v4-flash` compatibility alias                               | /v1/chat/completions                 | ✅             |
 | Doubao Seed `doubao-seed-evolving`, Seed 2.1, and Seed 2.0 models                                                         | Volcengine Ark `/api/v3/chat/completions` | ✅        |
 | Hunyuan `hy3` and `hy4-preview` (Tencent Cloud TokenHub)                                                                   | `/v1/chat/completions`               | ✅             |
@@ -37,9 +38,30 @@ For details, see: `/bin/model_mapping.json`
 | Kimi `kimi-k3.1-pro` `kimi-k3` `kimi-k2.7-code` `kimi-k2.6` and `kimi-k2.5`                                               | OpenAI-compatible endpoint           | ✅             |
 | MiMo `mimo-v2.6-pro` `mimo-v2.6-flash` `mimo-v2.6-pro-ultraspeed` and earlier models                                      | OpenAI-compatible endpoint           | ✅             |
 
+Anthropic's OpenAI SDK compatibility endpoint supports basic Chat Completions calls. It ignores `response_format`, `reasoning_effort`, and tool `strict`, and the OpenAI SDK response does not include Claude thinking content. Use `/v1/messages` for native Anthropic features.
+
+### Additional Protocol Endpoints
+
+The three entry points validate, build, and forward their own protocol requests independently. Responses and Messages follow the OpenAI and Anthropic schemas respectively, and preserve provider extension fields without converting between protocols.
+
+Adapters are organized by protocol: `lib/src/adapters/chat_completions/<provider>/`, `lib/src/adapters/responses/<provider>/`, and `lib/src/adapters/messages/<provider>/`. Each protocol's `request.dart` stays in its own directory. Shared HTTP, authentication, and base adapter infrastructure stays under `lib/src/adapters/`.
+
+| Inbound API | Standard endpoint | Upstream provider adapters |
+|---|---|---|
+| OpenAI Responses | `/v1/responses` | OpenAI, DeepSeek, Qwen, Kimi, Doubao, Hunyuan (Tencent Cloud TokenHub) |
+| Anthropic Messages | `/v1/messages` | Anthropic, DeepSeek, Qwen, Zhipu GLM, Kimi, MiniMax, Doubao, Hunyuan (Tencent Cloud TokenHub) |
+
+#### Quick `.env` smoke test
+
+Copy `example/.env.example` to `example/.env`, set `GATEWAY_URL`, `API_KEY`, `MODEL`, and `ADAPTER`, then run `sh example/protocol_smoke.sh`. Set `PROTOCOL` to `chat`, `responses`, `messages`, or `all`. Leave `BASE_URL` empty to use `model_mapping.json`; set it to override the upstream URL, and use the matching `*_ENDPOINT` value when a provider needs a custom path. The default `hy3` example supports all three protocols.
+
+The script forwards `API_KEY` as the upstream key. Enable `mode.transparent` in `bin/config.json` before starting the server, or temporarily run without `bin/env.json`. This `.env` is read only by the test script; server key pools remain in `bin/env.json`, and default model routes remain in `bin/model_mapping.json`.
+
+Protocol support depends on the specific model and upstream product. Use each provider's current model compatibility documentation for features such as Responses conversation state, built-in tools, and multimodal inputs, or Messages thinking blocks, content blocks, and tool use. Hunyuan Responses and Messages use TokenHub, whose Responses support is model-specific. MiniMax's official Anthropic endpoint currently lists `MiniMax-M3.1-Flash` and `MiniMax-M3`.
+
 The gateway accepts OpenAI `reasoning_effort` and the compatibility aliases `enable_thinking` and `thinking.type`. It maps these controls to each routed model's documented API. Doubao `encrypted_content` is preserved in assistant messages and streaming responses; the Dart SDK facade exposes it as `encryptedContent` on the message and replays it automatically in later requests. Doubao requests cannot include both `max_tokens` and `max_completion_tokens`. Hunyuan effort levels map to `none` / `low` / `high` for Hy3 and `none` / `high` for Hy4 Preview.
 
-Hunyuan mappings default to Tencent TokenHub's Guangzhou endpoint. For the Singapore endpoint, set `base_url` to `https://tokenhub-intl.tencentmaas.com/v1`; the `hunyuan` adapter is retained.
+Hunyuan mappings default to Tencent TokenHub's Guangzhou endpoint. For the Singapore endpoint, set `base_url` to `https://tokenhub-intl.tencentcloudmaas.com/v1`; the `hunyuan` adapter is retained. Kimi Responses and Messages use Moonshot's international `api.moonshot.ai` host by default; its existing Chat Completions route is unchanged.
 
 ### HTTP Gateway
 
@@ -57,6 +79,12 @@ Hunyuan mappings default to Tencent TokenHub's Guangzhou endpoint. For the Singa
           {
             "type": "bearer",
             "apiKey": "OpenAI API Key, starting with sk-"
+          }
+        ],
+        "anthropic": [
+          {
+            "type": "bearer",
+            "apiKey": "Anthropic API key"
           }
         ],
         "deepseek": [
@@ -226,7 +254,7 @@ See:
 ### Adding a New Model
 
 1. Create a new adapter, e.g., `NewLLMAdapter`:
-    - In the `lib/src/adapters` directory, create a new folder `newllm`.
+    - In the `lib/src/adapters/chat_completions` directory, create a new folder `newllm`.
     - Inside this folder, create a `/model` subfolder and add model classes specific to the new LLM.
     - Add `adapter.dart` and implement the `LLMAdapter` class:
         - `init`: Initialize the adapter.
@@ -251,6 +279,7 @@ See:
       "newllm": NewLLMAdapter(),
      };
      ```
+    - Put Responses and Messages provider adapters under their matching protocol directories and register them in `responsesAdapterMapper` or `messagesAdapterMapper`.
 3. Update `/bin/model_mapping.json` to map request `model-name` values to the adapter:
    ```json
    {
