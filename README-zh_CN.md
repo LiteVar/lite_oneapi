@@ -191,10 +191,10 @@ Anthropic 的 OpenAI SDK 兼容端点适合基本 Chat Completions 调用；`res
 
 ### Dart SDK Facade
 
-除了 HTTP 用法，`lite_oneapi` 还提供了一层 Dart SDK 风格 facade，直接调用 core service，不需要经过本地 HTTP 中转。
+除了 HTTP 用法，`lite_oneapi` 还提供 Dart client，可直接调用 core service，不需要经过本地 HTTP 中转。使用 `package:lite_oneapi/lite_oneapi_client.dart` 可只导入这组高层 client API。client 分别提供 `chat`、`responses`、`messages`，各自保留对应协议的请求结构。
 
 ```dart
-import 'package:lite_oneapi/lite_oneapi.dart';
+import 'package:lite_oneapi/lite_oneapi_client.dart';
 
 Future<void> main() async {
   final client = LiteOneApiClient(
@@ -245,9 +245,44 @@ Future<void> main() async {
 - `LiteOneApiClientConfig`
 - `client.chat.create(...)`
 - `client.chat.createStream(...)`
+- `client.responses.create(...)` / `createRaw(...)` / `createStream(...)`
+- `client.messages.create(...)` / `createStream(...)`
+- `LiteOneApiSseEvent.eventName`、`.data`、`.id` 保留上游 SSE 事件内容
+
+Responses 使用 OpenAI 原生 JSON 请求体，默认返回 `OpenAiResponse`；需要保留厂商扩展响应字段时可用 `createRaw`。Messages 使用 Anthropic 原生 JSON 请求和响应 map。两种流式方法都返回 `LiteOneApiSseEvent`，其中包含上游事件名和数据，不会把一种协议的事件转换成另一种。
+
+```dart
+final protocolClient = LiteOneApiClient(
+  config: const LiteOneApiClientConfig(
+    apiKey: 'sk-your-api-key',
+    adapter: 'hunyuan',
+  ),
+);
+
+final response = await protocolClient.responses.create(request: {
+  'model': 'hy3',
+  'input': 'Reply with OK.',
+});
+print(response.id);
+
+final message = await protocolClient.messages.create(request: {
+  'model': 'hy3',
+  'max_tokens': 128,
+  'messages': [{'role': 'user', 'content': 'Reply with OK.'}],
+});
+print(message['stop_reason']);
+
+await for (final event in protocolClient.messages.createStream(request: {
+  'model': 'hy3',
+  'max_tokens': 128,
+  'messages': [{'role': 'user', 'content': 'Reply with OK.'}],
+})) {
+  print('${event.eventName}: ${event.data}');
+}
+```
 
 参考：
-- 示例：`/example/sdk_facade_example.dart`
+- 示例：`/example/sdk_facade_example.dart`、`/example/sdk_protocol_facade_example.dart`
 - 测试：`/test/sdk_facade_test.dart`
 
 ### 新增大模型

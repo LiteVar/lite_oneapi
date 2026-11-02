@@ -1,6 +1,8 @@
 ## 0.3.1
 
 - Update `dart_openai_sdk` to 6.2.0.
+- Add separate Dart client entry points for Responses and Anthropic Messages, including streaming events that retain their upstream event names.
+- Add a focused `lite_oneapi_client.dart` export for SDK consumers.
 
 ## 0.3.0
 

@@ -192,10 +192,10 @@ This is useful for:
 
 ### Dart SDK Facade
 
-Besides HTTP, `lite_oneapi` also provides a Dart SDK-style facade that calls the core gateway service directly without a local HTTP hop.
+Besides HTTP, `lite_oneapi` provides a Dart client that calls the core gateway service directly without a local HTTP hop. Import `package:lite_oneapi/lite_oneapi_client.dart` for this focused client API. The client exposes separate `chat`, `responses`, and `messages` members; each keeps its own protocol request shape.
 
 ```dart
-import 'package:lite_oneapi/lite_oneapi.dart';
+import 'package:lite_oneapi/lite_oneapi_client.dart';
 
 Future<void> main() async {
   final client = LiteOneApiClient(
@@ -246,9 +246,44 @@ Key types:
 - `LiteOneApiClientConfig`
 - `client.chat.create(...)`
 - `client.chat.createStream(...)`
+- `client.responses.create(...)` / `createRaw(...)` / `createStream(...)`
+- `client.messages.create(...)` / `createStream(...)`
+- `LiteOneApiSseEvent.eventName`, `.data`, and `.id` preserve upstream SSE frames
+
+Responses requests are passed as the native OpenAI JSON body and return an `OpenAiResponse`; use `createRaw` to retain provider-specific response fields. Messages requests and responses use native Anthropic JSON maps. Both protocol stream methods yield `LiteOneApiSseEvent`, which keeps the upstream event name and data available without converting between protocols.
+
+```dart
+final protocolClient = LiteOneApiClient(
+  config: const LiteOneApiClientConfig(
+    apiKey: 'sk-your-api-key',
+    adapter: 'hunyuan',
+  ),
+);
+
+final response = await protocolClient.responses.create(request: {
+  'model': 'hy3',
+  'input': 'Reply with OK.',
+});
+print(response.id);
+
+final message = await protocolClient.messages.create(request: {
+  'model': 'hy3',
+  'max_tokens': 128,
+  'messages': [{'role': 'user', 'content': 'Reply with OK.'}],
+});
+print(message['stop_reason']);
+
+await for (final event in protocolClient.messages.createStream(request: {
+  'model': 'hy3',
+  'max_tokens': 128,
+  'messages': [{'role': 'user', 'content': 'Reply with OK.'}],
+})) {
+  print('${event.eventName}: ${event.data}');
+}
+```
 
 See:
-- Example: `/example/sdk_facade_example.dart`
+- Examples: `/example/sdk_facade_example.dart`, `/example/sdk_protocol_facade_example.dart`
 - Tests: `/test/sdk_facade_test.dart`
 
 ### Adding a New Model

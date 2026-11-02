@@ -1,4 +1,4 @@
-import 'package:lite_oneapi/lite_oneapi.dart';
+import 'package:lite_oneapi/lite_oneapi_client.dart';
 
 Future<void> main() async {
   final client = LiteOneApiClient(
