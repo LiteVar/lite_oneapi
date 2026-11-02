@@ -1,5 +1,5 @@
 name: lite_oneapi
-description: An API convertor from OpenAI Schema to Other APIs.
+description: A lightweight Dart LLM API gateway and SDK supporting OpenAI Chat Completions, Responses, and Anthropic Messages across providers.
 version: 0.3.0
 repository: https://github.com/LiteVar/lite_oneapi
 

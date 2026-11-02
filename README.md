@@ -2,7 +2,7 @@
 
 English · [中文](README-zh_CN.md)
 
-A lite OpenAI HTTP API-compatible transformation tool that allows custom conversion rules for LLM APIs.
+A lightweight multi-protocol LLM API gateway and Dart SDK that routes Chat Completions, Responses, and Messages requests to provider-specific APIs.
 
 ## Install
 
@@ -143,7 +143,7 @@ Hunyuan mappings default to Tencent TokenHub's Guangzhou endpoint. For the Singa
     - If NOT converting, NOT need `env.json` file. Or in the `config.json` file, add `mode` field, `transparent` to be `true`.
 
 2. Run `server.dart`
-3. The client sends requests using the OpenAI API.
+3. Send requests to the endpoint for the protocol you use: `/v1/chat/completions`, `/v1/responses`, or `/v1/messages`.
 
 #### Custom Base URL and Adapter Override
 

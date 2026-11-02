@@ -2,7 +2,7 @@
 
 [English](README.md) · 中文
 
-一个轻量级的OpenAI HTTP API兼容转换工具，可以自定义大模型API的转换规则
+一个轻量级多协议大模型 API 网关与 Dart SDK，可将 Chat Completions、Responses 和 Anthropic Messages 请求适配到不同厂商的 API。
 
 ## 安装
 
@@ -142,7 +142,7 @@ Anthropic 的 OpenAI SDK 兼容端点适合基本 Chat Completions 调用；`res
    - 如果直接使用透传模式，则不需要创建`env.json`文件，或是config.json中，具有`mode`字段，`transparent`为`true`
 
 2. 运行`server.dart`
-3. 客户端使用OpenAI API发起请求
+3. 客户端按所用协议调用对应接口：`/v1/chat/completions`、`/v1/responses` 或 `/v1/messages`。
 
 #### 自定义 Base URL 和 Adapter
 
