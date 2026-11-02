@@ -16,7 +16,7 @@ or:
 
 ```yaml
 dependencies:
-  lite_oneapi: ^1.0.0
+  lite_oneapi: ^0.3.0
 ```
 
 ## Usage

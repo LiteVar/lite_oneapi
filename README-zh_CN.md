@@ -16,7 +16,7 @@ dart pub add lite_oneapi
 
 ```yaml
 dependencies:
-  lite_oneapi: ^1.0.0
+  lite_oneapi: ^0.3.0
 ```
 
 ## 使用

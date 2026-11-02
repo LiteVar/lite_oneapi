@@ -1,12 +1,8 @@
-## 1.0.0
+## 0.3.0
 
 - Add independent OpenAI Responses and Anthropic Messages endpoints with provider-specific adapters.
 - Add Anthropic's OpenAI SDK-compatible Chat Completions endpoint.
 - Organize adapters by protocol, with provider implementations under each protocol.
-- Update Kimi and Hunyuan TokenHub endpoint defaults to match current provider documentation.
-
-## 0.3.0
-
 - Normalize OpenAI reasoning controls across provider-specific thinking APIs.
 - Align provider Chat Completions fields, error handling, and authentication headers.
 - Refresh model mappings and support fractional penalties in request schemas and the SDK.
