@@ -53,7 +53,7 @@ Anthropic 的 OpenAI SDK 兼容端点适合基本 Chat Completions 调用；`res
 
 #### 用 `.env` 快速测试
 
-复制 `example/.env.example` 为 `example/.env`，填写 `GATEWAY_URL`、`API_KEY`、`MODEL` 和 `ADAPTER`，然后运行 `sh example/protocol_smoke.sh`。`PROTOCOL` 可设为 `chat`、`responses`、`messages` 或 `all`；`BASE_URL` 留空时走 `model_mapping.json`，填写时覆盖上游地址，必要时用对应的 `*_ENDPOINT` 指定厂商路径。默认 `hy3` 示例支持三种协议。
+复制 `example/env.example` 为 `example/.env`，填写 `GATEWAY_URL`、`API_KEY`、`MODEL` 和 `ADAPTER`，然后运行 `sh example/protocol_smoke.sh`。`PROTOCOL` 可设为 `chat`、`responses`、`messages` 或 `all`；`BASE_URL` 留空时走 `model_mapping.json`，填写时覆盖上游地址，必要时用对应的 `*_ENDPOINT` 指定厂商路径。默认 `hy3` 示例支持三种协议。
 
 该脚本把 `API_KEY` 作为上游 key 透传。启动服务前请在 `bin/config.json` 启用 `mode.transparent`，或临时不使用 `bin/env.json`。这里的 `.env` 只供测试脚本读取；服务端的 key 池仍配置在 `bin/env.json`，模型默认路由仍配置在 `bin/model_mapping.json`。
 

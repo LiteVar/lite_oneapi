@@ -53,7 +53,7 @@ Adapters are organized by protocol: `lib/src/adapters/chat_completions/<provider
 
 #### Quick `.env` smoke test
 
-Copy `example/.env.example` to `example/.env`, set `GATEWAY_URL`, `API_KEY`, `MODEL`, and `ADAPTER`, then run `sh example/protocol_smoke.sh`. Set `PROTOCOL` to `chat`, `responses`, `messages`, or `all`. Leave `BASE_URL` empty to use `model_mapping.json`; set it to override the upstream URL, and use the matching `*_ENDPOINT` value when a provider needs a custom path. The default `hy3` example supports all three protocols.
+Copy `example/env.example` to `example/.env`, set `GATEWAY_URL`, `API_KEY`, `MODEL`, and `ADAPTER`, then run `sh example/protocol_smoke.sh`. Set `PROTOCOL` to `chat`, `responses`, `messages`, or `all`. Leave `BASE_URL` empty to use `model_mapping.json`; set it to override the upstream URL, and use the matching `*_ENDPOINT` value when a provider needs a custom path. The default `hy3` example supports all three protocols.
 
 The script forwards `API_KEY` as the upstream key. Enable `mode.transparent` in `bin/config.json` before starting the server, or temporarily run without `bin/env.json`. This `.env` is read only by the test script; server key pools remain in `bin/env.json`, and default model routes remain in `bin/model_mapping.json`.
 

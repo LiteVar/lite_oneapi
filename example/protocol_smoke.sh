@@ -4,7 +4,7 @@ set -eu
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 ENV_FILE=${ENV_FILE:-"$SCRIPT_DIR/.env"}
 if [ ! -f "$ENV_FILE" ]; then
-  echo "Missing $ENV_FILE. Copy example/.env.example to example/.env and edit it." >&2
+  echo "Missing $ENV_FILE. Copy example/env.example to example/.env and edit it." >&2
   exit 1
 fi
 
