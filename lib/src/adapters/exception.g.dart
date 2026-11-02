@@ -7,9 +7,15 @@ part of 'exception.dart';
 // **************************************************************************
 
 Map<String, dynamic> _$AdapterNotFoundExceptionToJson(
-  AdapterNotFoundException instance,
-) => <String, dynamic>{'code': instance.code, 'message': instance.message};
+        AdapterNotFoundException instance) =>
+    <String, dynamic>{
+      'code': instance.code,
+      'message': instance.message,
+    };
 
 Map<String, dynamic> _$UnsupportedRequestExceptionToJson(
-  UnsupportedRequestException instance,
-) => <String, dynamic>{'code': instance.code, 'message': instance.message};
+        UnsupportedRequestException instance) =>
+    <String, dynamic>{
+      'code': instance.code,
+      'message': instance.message,
+    };

@@ -8,10 +8,9 @@ part of 'embeddings_response.dart';
 
 EmbeddingsResponse _$EmbeddingsResponseFromJson(Map<String, dynamic> json) =>
     EmbeddingsResponse(
-      embedding:
-          (json['embedding'] as List<dynamic>)
-              .map((e) => (e as num).toDouble())
-              .toList(),
+      embedding: (json['embedding'] as List<dynamic>)
+          .map((e) => (e as num).toDouble())
+          .toList(),
       index: (json['index'] as num).toInt(),
       object: json['object'] as String,
     );
