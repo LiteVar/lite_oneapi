@@ -1,3 +1,7 @@
+## 0.3.1
+
+- Update `dart_openai_sdk` to 6.2.0.
+
 ## 0.3.0
 
 - Require Dart SDK 3.12 or newer and refresh runtime and development dependencies.
