@@ -20,6 +20,6 @@ Map<String, dynamic> _$AudioSpeechRequestToJson(AudioSpeechRequest instance) =>
       'input': instance.input,
       'model': instance.model,
       'voice': instance.voice,
-      if (instance.response_format case final value?) 'response_format': value,
-      if (instance.speed case final value?) 'speed': value,
+      'response_format': ?instance.response_format,
+      'speed': ?instance.speed,
     };

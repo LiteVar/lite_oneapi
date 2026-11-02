@@ -1,5 +1,6 @@
 ## 0.3.0
 
+- Require Dart SDK 3.12 or newer and refresh runtime and development dependencies.
 - Add independent OpenAI Responses and Anthropic Messages endpoints with provider-specific adapters.
 - Add Anthropic's OpenAI SDK-compatible Chat Completions endpoint.
 - Organize adapters by protocol, with provider implementations under each protocol.
