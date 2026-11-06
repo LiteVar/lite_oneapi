@@ -1,5 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:lite_oneapi/lite_oneapi_client.dart'
+    show
+        LiteOneApiClient,
+        LiteOneApiClientConfig,
+        OpenAIChatCompletionChoiceMessageContentItemModel,
+        OpenAIChatCompletionChoiceMessageModel,
+        OpenAIChatCompletionModel,
+        OpenAIChatMessageRole;
 import 'package:lite_oneapi/src/adapters/chat_completions/deepseek/adapter.dart';
 import 'package:lite_oneapi/src/adapters/exception.dart';
 import 'package:lite_oneapi/src/adapters/chat_completions/glm/adapter.dart';
@@ -183,6 +192,41 @@ void main() {
       expect(body.containsKey('enable_thinking'), isFalse);
     });
 
+    test(
+        'OpenAI drops a thinking-off control for models without a reasoning switch',
+        () async {
+      final List<Map<String, dynamic>> controls = <Map<String, dynamic>>[
+        {'enable_thinking': false},
+        {
+          'thinking': {'type': 'disabled'},
+        },
+      ];
+      for (final Map<String, dynamic> control in controls) {
+        for (final String model in const ['deepseek-v4-flash', 'gpt-4o']) {
+          final Map<String, dynamic> body =
+              await OpenAIAdapter().convertRequest(
+            _request(),
+            _meta(model, control),
+          );
+          final String reason = '$model $control';
+          expect(body.containsKey('enable_thinking'), isFalse, reason: reason);
+          expect(body.containsKey('thinking'), isFalse, reason: reason);
+          expect(body.containsKey('reasoning_effort'), isFalse, reason: reason);
+        }
+      }
+    });
+
+    test('OpenAI still rejects enabling thinking on models without a switch',
+        () async {
+      await expectLater(
+        OpenAIAdapter().convertRequest(
+          _request(),
+          _meta('gpt-4o', {'enable_thinking': true}),
+        ),
+        throwsA(isA<UnsupportedRequestException>()),
+      );
+    });
+
     test('MiniMax rejects disabling thinking on M2.x', () {
       expect(
         () => ReasoningCompatibility.apply(
@@ -297,6 +341,67 @@ void main() {
       expect(body['messages'][0]['content'], isNull);
       expect(body['messages'][0]['reasoning_content'], '');
       expect(body['reasoning_effort'], 'none');
+    });
+  });
+
+  group('OpenAI adapter through the SDK client', () {
+    test('thinking-off request reaches a non-reasoning model without aliases',
+        () async {
+      final HttpServer upstream =
+          await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      addTearDown(() => upstream.close(force: true));
+      final List<Map<String, dynamic>> received = <Map<String, dynamic>>[];
+      upstream.listen((HttpRequest request) async {
+        final String payload = await utf8.decoder.bind(request).join();
+        received.add(jsonDecode(payload) as Map<String, dynamic>);
+        request.response
+          ..statusCode = 200
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode({
+            'id': 'chatcmpl-thinking-off',
+            'created': 1710000000,
+            'choices': [
+              {
+                'index': 0,
+                'finish_reason': 'stop',
+                'message': {'role': 'assistant', 'content': 'ok'},
+              },
+            ],
+            'usage': {
+              'prompt_tokens': 1,
+              'completion_tokens': 1,
+              'total_tokens': 2,
+            },
+          }));
+        await request.response.close();
+      });
+
+      final LiteOneApiClient client = LiteOneApiClient(
+        config: LiteOneApiClientConfig(
+          apiKey: 'sk-test',
+          baseUrl: 'http://127.0.0.1:${upstream.port}/v1',
+          adapter: 'openai',
+        ),
+      );
+
+      final OpenAIChatCompletionModel result = await client.chat.create(
+        model: 'deepseek-v4-flash',
+        messages: [
+          OpenAIChatCompletionChoiceMessageModel(
+            role: OpenAIChatMessageRole.user,
+            content: [
+              OpenAIChatCompletionChoiceMessageContentItemModel.text('hello'),
+            ],
+          ),
+        ],
+        enableThinking: false,
+      );
+
+      expect(result.choices.first.message.content!.first.text, 'ok');
+      expect(received, hasLength(1));
+      expect(received.single['model'], 'deepseek-v4-flash');
+      expect(received.single.containsKey('enable_thinking'), isFalse);
+      expect(received.single.containsKey('thinking'), isFalse);
     });
   });
 }

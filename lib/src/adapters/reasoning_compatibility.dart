@@ -321,6 +321,12 @@ class ReasoningCompatibility {
           if (effort != null && !hasEnableThinking && !hasThinking) {
             return body;
           }
+          // A model without a reasoning switch cannot be asked to think, so a
+          // request that only turns thinking off is already satisfied. The
+          // aliases were removed above; do not fail the whole request for it.
+          if (!enabled) {
+            return body;
+          }
           throw UnsupportedRequestException(
             'Model `$model` does not expose a compatible reasoning control.',
           );
