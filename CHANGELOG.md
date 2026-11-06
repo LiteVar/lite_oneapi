@@ -1,3 +1,7 @@
+## 0.3.3
+
+- Ignore thinking-off controls for OpenAI-compatible models that do not expose a reasoning switch.
+
 ## 0.3.2
 
 - Add separate Dart client entry points for Responses and Anthropic Messages, including streaming events that retain their upstream event names.
